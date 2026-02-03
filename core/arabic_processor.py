@@ -59,8 +59,7 @@ class ArabicProcessor:
         has_presentation_forms = bool(re.search(r'[\ufb50-\ufdff\ufe70-\ufeff]', raw_text))
         
         if has_presentation_forms:
-            # Convert Visual Glyphs back to Logical Characters (e.g. ﻼ -> ل + ا)
-            # NFKC normalization is the standard way to map presentation forms to base characters
+            print(f"  [ArabicProcessor] Presentation forms detected. Normalizing NFKC.")
             text = unicodedata.normalize('NFKC', raw_text)
         else:
             text = raw_text
@@ -76,14 +75,12 @@ class ArabicProcessor:
         # we want to ensure the string is in logical order.
         
         if logical:
-            # For Word, we want LOGICAL order base characters.
             if has_presentation_forms:
-                # If it had presentation forms, it was definitely in visual order.
+                print(f"  [ArabicProcessor] Reversing visual presentation forms for logical output.")
                 text = get_display(text)
             else:
-                # ONLY reverse if we are reasonably sure it's reversed.
-                # Avoid get_display on logical mixed text as it can mess up numbers/English.
                 if is_likely_reversed_arabic(text):
+                    print(f"  [ArabicProcessor] Heuristic detected REVERSED text. Reversing back.")
                     text = get_display(text)
             
             return normalize_nfc(text)
@@ -135,10 +132,11 @@ class ArabicProcessor:
             # Also consider characters in the Arabic block
             arabic_chars = sum(1 for c in text if is_arabic_char(c))
             total_chars = len([c for c in text if c.strip()])
-            is_arabic = total_chars > 0 and (arabic_chars / total_chars) > 0.2
+            # If any significant Arabic is found, treat as Arabic to be safe with RTL
+            is_arabic = total_chars > 0 and (arabic_chars / total_chars) > 0.1
         
-        # Process text
         if is_arabic:
+            print(f"  [ArabicProcessor] Processing Arabic paragraph: {text[:30]}...")
             processed_text = self.normalize_arabic_text(text, logical=logical_output)
         else:
             # For non-Arabic text, just normalize Unicode

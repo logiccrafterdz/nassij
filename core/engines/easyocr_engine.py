@@ -52,8 +52,23 @@ class EasyOCREngine(OCREngine):
             
         img = self._prepare_image(image_input)
         
+        # Pre-processing: Convert to grayscale and improve contrast
+        if len(img.shape) == 3:
+            import cv2
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+            img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+            # Revert to RGB for EasyOCR (which expects 3 channels or 1)
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+
         # EasyOCR returns: [[bbox, text, conf], ...]
-        raw_results = self.reader.readtext(img)
+        # Granular settings to avoid merging columns
+        raw_results = self.reader.readtext(
+            img, 
+            paragraph=False, 
+            width_ths=0.1,  # Strict horizontal merging
+            add_margin=0.1,
+            slope_ths=0.1
+        )
         
         raw_blocks = []
         full_text_parts = []

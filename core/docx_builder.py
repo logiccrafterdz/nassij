@@ -101,8 +101,12 @@ class DOCXBuilder:
             rFonts.set(qn('w:ascii'), font_name)
             rFonts.set(qn('w:hAnsi'), font_name)
             rFonts.set(qn('w:cs'), font_name)
-            rFonts.set(qn('w:hint'), 'cs')  # Hint that this run contains complex script text
+            rFonts.set(qn('w:hint'), 'cs')
             rPr.append(rFonts)
+            
+            # Essential for RTL text runs
+            rtl = OxmlElement('w:rtl')
+            rPr.append(rtl)
     
     def add_mixed_paragraph(self, 
                            text: str,
