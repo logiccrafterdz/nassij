@@ -165,28 +165,39 @@ class DOCXBuilder:
             run.font.name = font_name
             run.font.size = Pt(font_size)
     
+    def add_image(self, image_data: bytes, width_points: Optional[float] = None) -> None:
+        """
+        Add an image to the document.
+        """
+        from io import BytesIO
+        from docx.shared import Inches
+        
+        if not self.doc:
+            raise RuntimeError("Document not created.")
+            
+        # Add a paragraph for the image
+        p = self.doc.add_paragraph()
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        
+        run = p.add_run()
+        # Word DPI is 72, so points / 72 = inches
+        width = Inches(width_points / 72.0) if width_points else None
+        run.add_picture(BytesIO(image_data), width=width)
+
     def add_table(self, table_data: Dict) -> None:
         """
         Add a table to the document.
-        
-        Args:
-            table_data: Table data dictionary from OCR or text extraction
         """
         if not self.doc:
-            raise RuntimeError("Document not created. Call create_document() first.")
-        
+            raise RuntimeError("Document not created.")
         self.table_handler.process_table_from_ocr(table_data, self.doc)
-    
+
     def add_text_blocks(self, text_blocks: List[Dict]) -> None:
         """
-        Add multiple blocks (text or table) to the document.
-        
-        Args:
-            text_blocks: List of block dictionaries:
-                [{'text': str, 'type': 'text'}, {'cells': [...], 'type': 'table'}]
+        Add multiple blocks (text, table, or image) to the document.
         """
         if not self.doc:
-            raise RuntimeError("Document not created. Call create_document() first.")
+            raise RuntimeError("Document not created.")
         
         for block in text_blocks:
             b_type = block.get('type', 'text')
@@ -196,6 +207,12 @@ class DOCXBuilder:
                     self.add_mixed_paragraph(text)
             elif b_type == 'table':
                 self.add_table(block)
+            elif b_type == 'image':
+                img_bytes = block.get('image_bytes')
+                if img_bytes:
+                    bbox = block.get('bbox', [0,0,100,0])
+                    width = bbox[2] - bbox[0]
+                    self.add_image(img_bytes, width_points=width)
     
     def save(self, output_path: str) -> str:
         """

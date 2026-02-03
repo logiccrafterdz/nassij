@@ -44,9 +44,8 @@ class EasyOCREngine(OCREngine):
 
     def extract_layout(self, image_input: Any) -> Dict[str, Any]:
         """
-        Extract text blocks using EasyOCR.
-        Note: EasyOCR doesn't detect tables natively like Paddle. 
-        We return text blocks, and table detection would need a separate heuristic or model.
+        Extract text blocks using EasyOCR and analyze layout.
+        Uses LayoutProcessor for table detection.
         """
         if not self.is_ready:
             raise RuntimeError("EasyOCR not initialized")
@@ -54,19 +53,17 @@ class EasyOCREngine(OCREngine):
         img = self._prepare_image(image_input)
         
         # EasyOCR returns: [[bbox, text, conf], ...]
-        # bbox is [[x1,y1], [x2,y1], [x2,y2], [x1,y2]]
         raw_results = self.reader.readtext(img)
         
-        text_blocks = []
+        raw_blocks = []
         full_text_parts = []
         
         for bbox, text, conf in raw_results:
-            # Normalize bbox to [min_x, min_y, max_x, max_y]
             xs = [p[0] for p in bbox]
             ys = [p[1] for p in bbox]
             simple_bbox = [min(xs), min(ys), max(xs), max(ys)]
             
-            text_blocks.append({
+            raw_blocks.append({
                 'text': text,
                 'bbox': simple_bbox,
                 'confidence': float(conf),
@@ -74,9 +71,19 @@ class EasyOCREngine(OCREngine):
             })
             full_text_parts.append(text)
             
+        # Analyze Layout (Detect Tables/Columns)
+        from core.layout_processor import LayoutProcessor
+        lp = LayoutProcessor()
+        regions = lp.process_layout(raw_blocks)
+        
+        # Separate tables and text blocks for backward compatibility if needed,
+        # but Nassij DOCXBuilder now supports interleaved blocks.
+        text_blocks = [r for r in regions if r['type'] == 'text']
+        tables = [r for r in regions if r['type'] == 'table']
+            
         return {
-            'text_blocks': text_blocks,
-            'tables': [], # Table detection pending (requires Table Transformer)
+            'text_blocks': regions, # Interleaved regions (preserving reading order)
+            'tables': [], # Keep empty as 'text_blocks' contains everything correctly typed
             'full_text': "\n".join(full_text_parts)
         }
 

@@ -13,7 +13,7 @@ from typing import Optional
 from bidi.algorithm import get_display
 import arabic_reshaper
 
-from utils.unicode_helpers import normalize_nfc, count_diacritics, is_arabic_char
+from utils.unicode_helpers import normalize_nfc, count_diacritics, is_arabic_char, is_likely_reversed_arabic
 
 
 class ArabicProcessor:
