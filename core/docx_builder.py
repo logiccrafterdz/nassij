@@ -35,12 +35,18 @@ class DOCXBuilder:
     
     def create_document(self) -> Document:
         """
-        Create a new DOCX document.
-        
-        Returns:
-            Document object
+        Create a new DOCX document and set section-level RTL.
         """
         self.doc = Document()
+        
+        # Set section RTL (Crucial for page margins and general direction)
+        for section in self.doc.sections:
+            sectPr = section._sectPr
+            bidi = sectPr.find(qn('w:bidi'))
+            if bidi is None:
+                bidi = OxmlElement('w:bidi')
+                sectPr.append(bidi)
+                
         return self.doc
     
     def add_rtl_paragraph(self, 
@@ -71,18 +77,16 @@ class DOCXBuilder:
         
         # Set RTL if Arabic
         if is_arabic:
-            # Enforce RTL at XML level (CRITICAL for Word rendering)
-            pPr = p._element.pPr
-            if pPr is None:
-                pPr = OxmlElement('w:pPr')
-                p._element.insert(0, pPr)
-            bidi = OxmlElement('w:bidi')
-            pPr.append(bidi)
+            # Enforce RTL at paragraph level
+            pPr = p._element.get_or_add_pPr()
+            bidi = pPr.find(qn('w:bidi'))
+            if bidi is None:
+                bidi = OxmlElement('w:bidi')
+                pPr.append(bidi)
             
             # Set right alignment
             p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
         else:
-            # Left alignment for non-Arabic text
             p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
         
         # Add text with font settings
@@ -90,13 +94,11 @@ class DOCXBuilder:
         run.font.name = font_name
         run.font.size = Pt(font_size)
         
-        # Set RTL font property for Arabic
+        # Set RTL run property for Arabic
         if is_arabic:
-            # Set rFonts (right-to-left font) - critical for RTL rendering
-            rPr = run._element.rPr
-            if rPr is None:
-                rPr = OxmlElement('w:rPr')
-                run._element.insert(0, rPr)
+            rPr = run._element.get_or_add_rPr()
+            
+            # Complex script font settings
             rFonts = OxmlElement('w:rFonts')
             rFonts.set(qn('w:ascii'), font_name)
             rFonts.set(qn('w:hAnsi'), font_name)
@@ -104,9 +106,11 @@ class DOCXBuilder:
             rFonts.set(qn('w:hint'), 'cs')
             rPr.append(rFonts)
             
-            # Essential for RTL text runs
-            rtl = OxmlElement('w:rtl')
-            rPr.append(rtl)
+            # RTL direction flag
+            rtl = rPr.find(qn('w:rtl'))
+            if rtl is None:
+                rtl = OxmlElement('w:rtl')
+                rPr.append(rtl)
     
     def add_mixed_paragraph(self, 
                            text: str,
@@ -137,12 +141,12 @@ class DOCXBuilder:
         # For mixed text, use RTL if primarily Arabic
         if is_arabic:
             # Paragraph level RTL
-            pPr = p._element.pPr
-            if pPr is None:
-                pPr = OxmlElement('w:pPr')
-                p._element.insert(0, pPr)
-            bidi = OxmlElement('w:bidi')
-            pPr.append(bidi)
+            pPr = p._element.get_or_add_pPr()
+            bidi = pPr.find(qn('w:bidi'))
+            if bidi is None:
+                bidi = OxmlElement('w:bidi')
+                pPr.append(bidi)
+            
             p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
             
             # Add text with run level RTL properties
@@ -150,18 +154,18 @@ class DOCXBuilder:
             run.font.name = font_name
             run.font.size = Pt(font_size)
             
-            rPr = run._element.rPr
-            if rPr is None:
-                rPr = OxmlElement('w:rPr')
-                run._element.insert(0, rPr)
+            rPr = run._element.get_or_add_rPr()
             # Set complex script properties
-            rtl = OxmlElement('w:rtl')
-            rPr.append(rtl)
+            rtl = rPr.find(qn('w:rtl'))
+            if rtl is None:
+                rtl = OxmlElement('w:rtl')
+                rPr.append(rtl)
             
             rFonts = OxmlElement('w:rFonts')
             rFonts.set(qn('w:ascii'), font_name)
             rFonts.set(qn('w:hAnsi'), font_name)
             rFonts.set(qn('w:cs'), font_name)
+            rFonts.set(qn('w:hint'), 'cs')
             rPr.append(rFonts)
         else:
             p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
@@ -208,6 +212,7 @@ class DOCXBuilder:
             if b_type == 'text':
                 text = block.get('text', '').strip()
                 if text:
+                    # Paragraph direction
                     self.add_mixed_paragraph(text)
             elif b_type == 'table':
                 self.add_table(block)

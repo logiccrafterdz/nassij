@@ -115,54 +115,40 @@ def is_arabic_char(char: str) -> bool:
 
 
 def is_likely_reversed_arabic(text: str) -> bool:
-    """
-    Heuristic to detect if Arabic text is in visual order (reversed).
-    Checks for characters that usually end words/sentences appearing at the start.
-    
-    Args:
-        text: Input text string
-        
-    Returns:
-        True if text is likely in visual order
-    """
-    if not text:
-        return False
-        
-    # Remove whitespace and numbers for analysis
-    clean_text = re.sub(r'[\s\d\p{P}]', '', text)
-    if not clean_text or len(clean_text) < 3:
-        return False
-        
-    # Heuristic 1: Ta Marbuta (ة) or Final Yaa (ى) at the beginning of words
-    # Words in the string
+    """Detect if characters are in visual order (reversed)."""
+    if not text: return False
     words = text.split()
     arabic_words = [w for w in words if any(is_arabic_char(c) for c in w)]
+    if not arabic_words: return False
     
-    if not arabic_words:
-        return False
-        
-    # Ta Marbuta (ة) index: \u0629
-    # Final Yaa (ى) index: \u0649
-    # These characters almost EXCLUSIVELY appear at the end of Arabic words.
     reversed_indicators = 0
     total_checks = 0
-    
     for word in arabic_words:
-        # Strip non-arabic from word edges
         w = re.sub(r'^[^\u0600-\u06FF]+|[^\u0600-\u06FF]+$', '', word)
-        if len(w) < 2:
-            continue
-            
+        if len(w) < 2: continue
         total_checks += 1
-        # If word starts with ة or ى, it's a very strong indicator of reversal
-        if w[0] in ('ة', 'ى'):
-            reversed_indicators += 1
-        # If word ends with common initial-only prefixes like ال (reversed as لا)
-        # Note: ال is \u0627\u0644. Reversed is \u0644\u0627 (Lam-Alif ligature)
-        if w.endswith('لا') and not w.startswith('ال'):
-            reversed_indicators += 0.5
+        if w[0] in ('ة', 'ى'): reversed_indicators += 1
+        if w.endswith('لا') and not w.startswith('ال'): reversed_indicators += 0.5
             
-    if total_checks > 0 and (reversed_indicators / total_checks) > 0.3:
+    return total_checks > 0 and (reversed_indicators / total_checks) > 0.3
+
+def is_word_order_reversed(text: str) -> bool:
+    """
+    Detect if words are in LTR order but characters are logical (RTL script).
+    Example: ')نسخة نسيج اختبار' vs 'اختبار نسيج (نسخة)'
+    """
+    if not text or len(text) < 5:
+        return False
+        
+    # Heuristic: Starts with ending punctuation
+    if text.strip().startswith(('!', '.', '؟', ')', ']', '}')):
+        return True
+        
+    # Heuristic: Ends with common starters (e.g. 'هذا', 'إن', 'بواسطة')
+    # Use simple list for now
+    starters = ['هذا', 'إن', 'اختبار', 'في', 'من']
+    words = text.split()
+    if words and words[-1] in starters and len(words) > 2:
         return True
         
     return False

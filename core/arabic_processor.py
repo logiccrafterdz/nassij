@@ -59,7 +59,7 @@ class ArabicProcessor:
         has_presentation_forms = bool(re.search(r'[\ufb50-\ufdff\ufe70-\ufeff]', raw_text))
         
         if has_presentation_forms:
-            print(f"  [ArabicProcessor] Presentation forms detected. Normalizing NFKC.")
+            # NFKC maps visual glyphs (ﻼ) to base characters (ل+ا)
             text = unicodedata.normalize('NFKC', raw_text)
         else:
             text = raw_text
@@ -67,20 +67,20 @@ class ArabicProcessor:
         # Step 1: Normalize to NFC
         text = normalize_nfc(text)
         
-        # Step 1.5: Detect if text is in Visual Order (Reversed)
-        # Often in PDFs, even if characters are base Unicode, they are stored backwards.
-        # Heuristic: If Arabic text starts with a character that usually ends a word 
-        # (like ة or final forms) but is at the beginning of the string, it might be reversed.
-        # For now, we'll assume that if we are targeting Logical output (Word), 
-        # we want to ensure the string is in logical order.
-        
         if logical:
+            # Step A: Word-level Reversal (Logical chars, LTR word sequence)
+            from utils.unicode_helpers import is_word_order_reversed
+            if is_word_order_reversed(text):
+                # Reverse the sequence of tokens
+                text = " ".join(text.split()[::-1])
+                
+            # Step B: Character-level Reversal (Visual Order)
             if has_presentation_forms:
-                print(f"  [ArabicProcessor] Reversing visual presentation forms for logical output.")
+                # Presentation forms are almost always in Visual Order
                 text = get_display(text)
             else:
+                # Only reverse if it's confirmed reversed base sequence
                 if is_likely_reversed_arabic(text):
-                    print(f"  [ArabicProcessor] Heuristic detected REVERSED text. Reversing back.")
                     text = get_display(text)
             
             return normalize_nfc(text)
@@ -136,7 +136,6 @@ class ArabicProcessor:
             is_arabic = total_chars > 0 and (arabic_chars / total_chars) > 0.1
         
         if is_arabic:
-            print(f"  [ArabicProcessor] Processing Arabic paragraph: {text[:30]}...")
             processed_text = self.normalize_arabic_text(text, logical=logical_output)
         else:
             # For non-Arabic text, just normalize Unicode

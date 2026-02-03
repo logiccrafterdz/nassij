@@ -23,13 +23,34 @@ class LayoutProcessor:
         if not blocks:
             return []
             
+        # 0. Global Direction Detection
+        self.direction = self._detect_global_direction(blocks)
+        print(f"  [LayoutProcessor] Global Direction Detected: {self.direction}")
+            
         # 1. Group by lines
         lines = self._group_by_lines(blocks)
         
-        # 2. Identify structural regions (simple grid-based table detection)
+        # 2. Identify structural regions
         results = self._detect_tables(lines)
         
         return results
+
+    def _detect_global_direction(self, blocks: List[Dict]) -> str:
+        """Determines if the page is primarily RTL or LTR."""
+        from utils.unicode_helpers import get_arabic_ratio
+        
+        # 1. Content bias
+        full_text = " ".join([b['text'] for b in blocks])
+        arabic_ratio = get_arabic_ratio(full_text)
+        
+        # 2. Alignment bias (Are blocks clustered on the right?)
+        # For a standard A4 (roughly 595 units wide)
+        right_weighted = sum(1 for b in blocks if b['bbox'][0] > 300)
+        left_weighted = sum(1 for b in blocks if b['bbox'][2] < 300)
+        
+        if arabic_ratio > 0.4 or right_weighted > left_weighted:
+            return "RTL"
+        return "LTR"
 
     def _group_by_lines(self, blocks: List[Dict]) -> List[List[Dict]]:
         """Group blocks into lines using shared Y-intersection."""
@@ -59,16 +80,27 @@ class LayoutProcessor:
                 if abs(b_y_mid - current_y_mid) < tol:
                     current_line.append(b)
                 else:
-                    # IMPORTANT: Sort line RTL (Right-to-Left) for Arabic processing
-                    # x[bbox][0] is the left edge. For RTL, we want higher x first.
-                    current_line.sort(key=lambda x: x['bbox'][0], reverse=True)
-                    lines.append(current_line)
+                    # Finalize line with script-aware sorting
+                    lines.append(self._sort_line_by_script(current_line))
                     current_line = [b]
                     current_y_mid = b_y_mid
             
-            current_line.sort(key=lambda x: x['bbox'][0], reverse=True)
-            lines.append(current_line)
+            lines.append(self._sort_line_by_script(current_line))
         return lines
+
+    def _sort_line_by_script(self, line: List[Dict]) -> List[Dict]:
+        """Sort line based on dominant script (RTL for Arabic, LTR otherwise)."""
+        if not line: return []
+        
+        from utils.unicode_helpers import get_arabic_ratio
+        full_text = " ".join([b['text'] for b in line])
+        
+        if get_arabic_ratio(full_text) > 0.3:
+            # Arabic line: Sort Right-to-Left (High X first)
+            return sorted(line, key=lambda x: x['bbox'][0], reverse=True)
+        else:
+            # Latin/Mixed line: Sort Left-to-Right (Low X first)
+            return sorted(line, key=lambda x: x['bbox'][0])
 
     def _merge_horizontal_neighbors(self, blocks: List[Dict]) -> List[Dict]:
         """Merge blocks that are on the same line and very close horizontally."""
@@ -139,12 +171,14 @@ class LayoutProcessor:
                     i = j
                     continue
             
-            if line:
                 # Paragraph: Merge blocks. 
-                # IMPORTANT: For Arabic paragraphs, if we have fragments, 
-                # we must join them such that the RIGHT-most is first (logical start).
-                # line is already sorted RTL in _group_by_lines
-                merged_text = " ".join([b['text'].strip() for b in line])
+                # Sort based on global/detected direction
+                if self.direction == "RTL":
+                    sorted_line = sorted(line, key=lambda b: b['bbox'][0], reverse=True)
+                else:
+                    sorted_line = sorted(line, key=lambda b: b['bbox'][0])
+                    
+                merged_text = " ".join([b['text'].strip() for b in sorted_line if b['text'].strip()])
                 x0 = min(b['bbox'][0] for b in line)
                 y0 = min(b['bbox'][1] for b in line)
                 x1 = max(b['bbox'][2] for b in line)
@@ -179,8 +213,11 @@ class LayoutProcessor:
         """Convert clustered rows into a Nassij Table Object."""
         cells = []
         for row in rows:
-            # Sort individual row by X (descending for Arabic RTL)
-            sorted_row = sorted(row, key=lambda b: b['bbox'][0], reverse=True)
+            # Sort individual row by X based on global direction
+            if self.direction == "RTL":
+                sorted_row = sorted(row, key=lambda b: b['bbox'][0], reverse=True)
+            else:
+                sorted_row = sorted(row, key=lambda b: b['bbox'][0])
             cells.append([b['text'] for b in sorted_row])
             
         # Full bbox
@@ -194,5 +231,5 @@ class LayoutProcessor:
             "type": "table",
             "bbox": [x0, y0, x1, y1],
             "cells": cells,
-            "is_arabic": True # Heuristic, can be refined
+            "is_arabic": self.direction == "RTL"
         }
