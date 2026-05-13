@@ -41,7 +41,8 @@ class TableHandler:
         max_cols = max(len(row) for row in cells) if cells else 1
         
         table = doc.add_table(rows=num_rows, cols=max_cols)
-        table.style = 'Light Grid Accent 1'
+        # Use a more standard style that definitely has borders
+        table.style = 'Table Grid'
         
         # Set Table to RTL at XML level
         tbl = table._element
@@ -49,8 +50,6 @@ class TableHandler:
         if tblPr is None:
             tblPr = OxmlElement('w:tblPr')
             tbl.insert(0, tblPr)
-        
-        tblLook = tblPr.find(qn('w:tblLook'))
         
         # Check if table is primarily Arabic
         is_arabic_table = table_data.get('is_arabic', False)
@@ -63,15 +62,17 @@ class TableHandler:
                     total_cells += 1
                     if any(is_arabic_char(c) for c in str(cell)):
                         arabic_cells += 1
-            is_arabic_table = (arabic_cells / total_cells > 0.2) if total_cells > 0 else False
+            is_arabic_table = (arabic_cells / total_cells > 0.3) if total_cells > 0 else False
 
         # Add bidiVisual for RTL table
         if is_arabic_table:
             bidiVisual = OxmlElement('w:bidiVisual')
-            if tblLook is not None:
-                tblLook.addnext(bidiVisual)
-            else:
-                tblPr.append(bidiVisual)
+            tblPr.append(bidiVisual)
+            
+            # Ensure table justification is RIGHT for RTL tables
+            jc = OxmlElement('w:jc')
+            jc.set(qn('w:val'), 'right')
+            tblPr.append(jc)
         
         for row_idx, row_data in enumerate(cells):
             for col_idx, cell_text in enumerate(row_data):
@@ -91,22 +92,29 @@ class TableHandler:
                     else:
                         p = cell.add_paragraph()
                     
-                    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT if processed['is_arabic'] else WD_ALIGN_PARAGRAPH.LEFT
+                    # Alignment: For Arabic tables, default cells to RIGHT
+                    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT if is_arabic_table or processed['is_arabic'] else WD_ALIGN_PARAGRAPH.LEFT
                     
-                    if processed['is_arabic']:
+                    if is_arabic_table or processed['is_arabic']:
                         self._set_rtl_paragraph(p)
                     
                     run = p.add_run(cell_text_processed)
                     run.font.name = 'Arial'
                     run.font.size = Pt(10)
                     
-                    if processed['is_arabic']:
-                        rPr = run._element.rPr
-                        if rPr is None:
-                            rPr = OxmlElement('w:rPr')
-                            run._element.insert(0, rPr)
-                        rtl = OxmlElement('w:rtl')
-                        rPr.append(rtl)
+                    if is_arabic_table or processed['is_arabic']:
+                        rPr = run._element.get_or_add_rPr()
+                        
+                        # Add RTL run property
+                        rtl = rPr.find(qn('w:rtl'))
+                        if rtl is None:
+                            rtl = OxmlElement('w:rtl')
+                            rPr.append(rtl)
+                            
+                        # Set font hint
+                        rFonts = OxmlElement('w:rFonts')
+                        rFonts.set(qn('w:hint'), 'cs')
+                        rPr.append(rFonts)
         
         return table
     

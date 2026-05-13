@@ -23,7 +23,10 @@ class LayoutProcessor:
         if not blocks:
             return []
             
-        # 0. Global Direction Detection
+        # 0. Virtual Block Splitting (Split blocks that were accidentally merged by OCR)
+        blocks = self._split_multicolumn_blocks(blocks)
+            
+        # 1. Global Direction Detection
         self.direction = self._detect_global_direction(blocks)
         print(f"  [LayoutProcessor] Global Direction Detected: {self.direction}")
             
@@ -166,7 +169,8 @@ class LayoutProcessor:
                         break
                 
                 # If we have multiple rows OR one row with VERY large gaps, it's a table
-                if len(table_rows) >= 2 or avg_gap > 60:
+                if len(table_rows) >= 2 or avg_gap > 50:
+                    print(f"  [LayoutProcessor] Detected Table with {len(table_rows)} rows. Avg Gap: {avg_gap:.1f}")
                     processed_regions.append(self._reconstruct_table_object(table_rows))
                     i = j
                     continue
@@ -207,10 +211,55 @@ class LayoutProcessor:
         total = max(span1[1], span2[1]) - min(span1[0], span2[0])
         
         if total == 0: return False
-        return (overlap / total) > 0.7
+        # Lenient match for tables (noisy OCR)
+        return (overlap / total) > 0.6
+
+    def _split_multicolumn_blocks(self, blocks: List[Dict]) -> List[Dict]:
+        """
+        Split a single block into multiple if it contains a large horizontal gap 
+        represented by multiple spaces. This fixes OCR 'over-merging' in tables.
+        """
+        split_blocks = []
+        for b in blocks:
+            text = b['text']
+            # Look for 2+ consecutive spaces (more aggressive)
+            if "  " in text:
+                # Use regex to find gaps of 2+ spaces
+                import regex as re
+                parts = re.split(r'(\s{2,})', text)
+                if len(parts) > 1:
+                    x0, y0, x1, y1 = b['bbox']
+                    total_chars = len(text)
+                    curr_char_idx = 0
+                    width = x1 - x0
+                    
+                    for part in parts:
+                        p_len = len(part)
+                        if not part.strip():
+                            # This is a gap
+                            curr_char_idx += p_len
+                            continue
+                        
+                        # Estimate start/end X based on char index
+                        start_x = x0 + (curr_char_idx / total_chars) * width
+                        part_width = (p_len / total_chars) * width
+                        
+                        split_blocks.append({
+                            'text': part.strip(),
+                            'bbox': [start_x, y0, start_x + part_width, y1],
+                            'confidence': b.get('confidence', 1.0),
+                            'type': 'text'
+                        })
+                        curr_char_idx += p_len
+                    continue
+            split_blocks.append(b)
+        return split_blocks
 
     def _reconstruct_table_object(self, rows: List[List[Dict]]) -> Dict:
         """Convert clustered rows into a Nassij Table Object."""
+        from core.arabic_processor import ArabicProcessor
+        ap = ArabicProcessor()
+        
         cells = []
         for row in rows:
             # Sort individual row by X based on global direction
@@ -218,7 +267,16 @@ class LayoutProcessor:
                 sorted_row = sorted(row, key=lambda b: b['bbox'][0], reverse=True)
             else:
                 sorted_row = sorted(row, key=lambda b: b['bbox'][0])
-            cells.append([b['text'] for b in sorted_row])
+            
+            # Process each cell's text through the ArabicProcessor (Logical Order)
+            row_texts = []
+            for b in sorted_row:
+                text = b['text'].strip()
+                if self.direction == "RTL":
+                    # Process as logical RTL for table cell
+                    text = ap.normalize_arabic_text(text, logical=True)
+                row_texts.append(text)
+            cells.append(row_texts)
             
         # Full bbox
         all_blocks = [b for row in rows for b in row]

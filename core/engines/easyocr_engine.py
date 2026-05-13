@@ -57,8 +57,9 @@ class EasyOCREngine(OCREngine):
         raw_results = self.reader.readtext(
             img, 
             paragraph=False, 
-            width_ths=0.1,  # Strict horizontal merging
-            add_margin=0.1,
+            width_ths=0.001,  # Minimum possible merging
+            link_threshold=0.1, # Break blocks on even small gaps
+            add_margin=0.0,
             slope_ths=0.1
         )
         
