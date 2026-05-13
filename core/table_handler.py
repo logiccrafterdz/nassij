@@ -146,10 +146,8 @@ class TableHandler:
             List of merged cell definitions:
             [{'row': int, 'col': int, 'row_span': int, 'col_span': int}, ...]
         """
-        # This is a placeholder for actual merged cell detection
-        # In practice, you would analyze cell bounding boxes to detect overlaps
-        # For now, return empty list (no merged cells detected)
-        return []
+        # If the OCR engine already detected merged cells, use them
+        return table_data.get('merged_cells', [])
     
     def apply_merged_cells(self, table: Table, merged_cells: List[Dict]):
         """

@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 import logging
 import numpy as np
 from PIL import Image
@@ -83,8 +83,13 @@ class PaddleOCREngine(OCREngine):
                 # res containing html or cell info
                 # verify if it has reliable html or if requires rebuilding
                 if 'html' in res:
+                    html_content = res['html']
+                    parsed_cells, merged_cells = self._parse_html_table(html_content)
                     tables.append({
-                        'html': res['html'],
+                        'type': 'table',
+                        'html': html_content,
+                        'cells': parsed_cells,
+                        'merged_cells': merged_cells,
                         'bbox': bbox,
                         'confidence': region.get('score', 0.0)
                     })
@@ -138,3 +143,50 @@ class PaddleOCREngine(OCREngine):
             raise ValueError(f"Unsupported image type: {type(image_input)}")
             
         return self.preprocessor.process(img)
+
+    def _parse_html_table(self, html_str: str) -> Tuple[List[List[str]], List[Dict]]:
+        import regex as re
+        rows = []
+        merged_cells = []
+        
+        # Find all tr tags
+        tr_matches = re.findall(r'<tr[^>]*>(.*?)</tr>', html_str, re.IGNORECASE | re.DOTALL)
+        for row_idx, tr in enumerate(tr_matches):
+            # Find all td or th tags
+            cell_matches = re.finditer(r'<t[dh]([^>]*)>(.*?)</t[dh]>', tr, re.IGNORECASE | re.DOTALL)
+            row = []
+            col_idx = 0
+            for match in cell_matches:
+                attrs = match.group(1)
+                content = match.group(2)
+                
+                colspan = 1
+                rowspan = 1
+                cs_match = re.search(r'colspan\s*=\s*["\']?(\d+)["\']?', attrs, re.IGNORECASE)
+                if cs_match: colspan = int(cs_match.group(1))
+                rs_match = re.search(r'rowspan\s*=\s*["\']?(\d+)["\']?', attrs, re.IGNORECASE)
+                if rs_match: rowspan = int(rs_match.group(1))
+                
+                if colspan > 1 or rowspan > 1:
+                    merged_cells.append({
+                        'row': row_idx,
+                        'col': col_idx,
+                        'row_span': rowspan,
+                        'col_span': colspan
+                    })
+                
+                # Remove inner HTML tags if any
+                clean_text = re.sub(r'<[^>]+>', '', content).strip()
+                # Unescape common HTML entities
+                clean_text = clean_text.replace('&nbsp;', ' ').replace('&lt;', '<').replace('&gt;', '>')
+                row.append(clean_text)
+                
+                # Pad for colspan so grid aligns
+                for _ in range(colspan - 1):
+                    row.append("")
+                
+                col_idx += colspan
+                
+            if row:
+                rows.append(row)
+        return rows, merged_cells
