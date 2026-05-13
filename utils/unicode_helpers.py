@@ -8,10 +8,10 @@ from typing import Tuple
 
 
 # Arabic diacritics range: U+064B to U+0652, plus U+0670 (dagger alif)
+# NOTE: Tatweel (U+0640) is a visual extender, NOT a diacritic
 DIACRITIC_RANGES = [
     (0x064B, 0x0652),  # Fatha, Damma, Kasra, etc.
     0x0670,            # Dagger alif
-    0x0640,            # Tatweel (kashida)
 ]
 
 
@@ -48,7 +48,7 @@ def count_diacritics(text: str) -> int:
         if 0x064B <= code <= 0x0652:
             count += 1
         # Check specific diacritics
-        elif code in (0x0670, 0x0640):
+        elif code == 0x0670:
             count += 1
     return count
 
@@ -66,7 +66,7 @@ def extract_diacritics(text: str) -> str:
     diacritics = []
     for char in text:
         code = ord(char)
-        if 0x064B <= code <= 0x0652 or code in (0x0670, 0x0640):
+        if 0x064B <= code <= 0x0652 or code == 0x0670:
             diacritics.append(char)
     return ''.join(diacritics)
 
@@ -85,7 +85,7 @@ def remove_diacritics(text: str) -> str:
     for char in text:
         code = ord(char)
         # Skip diacritic marks
-        if not (0x064B <= code <= 0x0652 or code in (0x0670, 0x0640)):
+        if not (0x064B <= code <= 0x0652 or code == 0x0670):
             result.append(char)
     return ''.join(result)
 

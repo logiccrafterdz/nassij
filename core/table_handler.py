@@ -20,14 +20,16 @@ class TableHandler:
     Supports merged cells, mixed Arabic/English, and borderless tables.
     """
     
-    def __init__(self, arabic_processor: Optional[ArabicProcessor] = None):
+    def __init__(self, arabic_processor: Optional[ArabicProcessor] = None, font_name: str = 'Arial'):
         """
         Initialize table handler.
         
         Args:
             arabic_processor: ArabicProcessor instance for text normalization
+            font_name: Font name for cell text rendering
         """
         self.arabic_processor = arabic_processor or ArabicProcessor()
+        self.font_name = font_name
     
     def reconstruct_table(self, table_data: Dict, doc: Document) -> Table:
         """
@@ -99,7 +101,7 @@ class TableHandler:
                         self._set_rtl_paragraph(p)
                     
                     run = p.add_run(cell_text_processed)
-                    run.font.name = 'Arial'
+                    run.font.name = self.font_name
                     run.font.size = Pt(10)
                     
                     if is_arabic_table or processed['is_arabic']:

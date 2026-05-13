@@ -193,6 +193,16 @@ class LayoutProcessor:
                     'text': merged_text,
                     'bbox': [x0, y0, x1, y1]
                 })
+            else:
+                # Single-block line — emit as text paragraph
+                block = line[0]
+                text = block.get('text', '').strip()
+                if text:
+                    processed_regions.append({
+                        'type': 'text',
+                        'text': text,
+                        'bbox': block['bbox']
+                    })
             i += 1
             
         return processed_regions

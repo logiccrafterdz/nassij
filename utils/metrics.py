@@ -2,7 +2,7 @@
 Quality metrics for Nassij conversion.
 Implements CER, WER, diacritics preservation, and ligature validation.
 """
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 import unicodedata
 
 from utils.unicode_helpers import count_diacritics, normalize_nfc

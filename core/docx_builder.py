@@ -30,7 +30,7 @@ class DOCXBuilder:
         """
         self.font_name = font_name
         self.arabic_processor = ArabicProcessor(preserve_diacritics=preserve_diacritics)
-        self.table_handler = TableHandler(self.arabic_processor)
+        self.table_handler = TableHandler(self.arabic_processor, font_name=font_name)
         self.doc: Optional[Document] = None
     
     def create_document(self) -> Document:
