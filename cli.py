@@ -4,7 +4,7 @@ Command-line interface for Nassij PDF-to-DOCX converter.
 import argparse
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Callable
 
 from core.pdf_reader import PDFReader
 from core.ocr_engine import PaddleOCREngine
@@ -18,7 +18,8 @@ def convert_pdf_to_docx(
     mode: str = 'balanced',
     preserve_diacritics: bool = True,
     font_name: str = 'Arial',
-    dpi: int = 300
+    dpi: int = 300,
+    progress_callback: Optional[Callable[[int, int, str], None]] = None
 ) -> bool:
     """
     Convert PDF to DOCX with Arabic support.
@@ -62,7 +63,10 @@ def convert_pdf_to_docx(
             
             # Process each page
             for page_num in range(page_count):
-                print(f"Processing page {page_num + 1}/{page_count}...")
+                if progress_callback:
+                    progress_callback(page_num + 1, page_count, "extracting")
+                else:
+                    print(f"Processing page {page_num + 1}/{page_count}...")
                 
                 # Extract text from page
                 page_data = pdf_reader.extract_text_from_page(page_num)
@@ -155,7 +159,49 @@ Examples:
     convert_parser.add_argument('--dpi', type=int, default=300,
                                help='DPI for scanned page conversion (default: 300)')
     
+    parser.add_argument('--info', action='store_true', help='Print PDF info without converting')
+    parser.add_argument('--benchmark', action='store_true', help='Run a benchmark test on the given PDF')
+    
     args = parser.parse_args()
+    
+    if args.info:
+        print(f"Analyzing PDF: {args.input}")
+        try:
+            with PDFReader(args.input) as pdf_reader:
+                pages = pdf_reader.get_page_count()
+                print(f"Total Pages: {pages}")
+                # Analyze a sample of pages to determine type
+                scanned_pages = 0
+                sample_size = min(pages, 5)
+                for i in range(sample_size):
+                    data = pdf_reader.extract_text_from_page(i)
+                    if data['is_scanned']: scanned_pages += 1
+                
+                if scanned_pages == sample_size:
+                    print("Document Type: Scanned (Requires OCR)")
+                elif scanned_pages > 0:
+                    print("Document Type: Hybrid (Contains scanned pages)")
+                else:
+                    print("Document Type: Digital Native")
+        except Exception as e:
+            print(f"Error reading PDF: {e}")
+        return
+        
+    if args.benchmark:
+        print(f"Running benchmark on: {args.input}")
+        # Simplistic benchmark for now
+        import time
+        start_time = time.time()
+        success = convert_pdf_to_docx(
+            args.input, args.output, args.mode, 
+            not args.no_diacritics, args.font, args.dpi
+        )
+        elapsed = time.time() - start_time
+        if success:
+            print(f"\nBenchmark completed successfully in {elapsed:.2f} seconds.")
+        else:
+            print(f"\nBenchmark failed after {elapsed:.2f} seconds.")
+        return
     
     if not args.command:
         parser.print_help()
