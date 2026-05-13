@@ -1,4 +1,4 @@
-# Nassij v1.0
+# Nassij v2.0
 
 **A High-Accuracy PDF-to-DOCX Converter Specialized for Arabic Language**
 
@@ -24,32 +24,44 @@
 
 1. **Clone or download this repository**
 
-2. **Install dependencies**:
+2. **Install using pip**:
    ```bash
-   pip install -r requirements.txt
+   # Install with standard dependencies
+   pip install -e .
+   
+   # Install with PaddleOCR dependencies (recommended for accurate tables)
+   pip install -e .[paddle]
+   
+   # Install dev dependencies
+   pip install -e .[dev]
    ```
 
-   > **Note**: PaddleOCR requires additional system dependencies. See [PaddleOCR Installation Guide](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.7/doc/doc_en/installation_en.md) for details.
+   > **Note**: PaddleOCR requires additional system dependencies. See [PaddleOCR Installation Guide](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.7/doc/doc_en/installation_en.md) for details. EasyOCR also requires PyTorch.
 
 3. **Verify installation**:
    ```bash
-   python cli.py convert --help
+   nassij --help
+   # Or using python
+   python cli.py --help
    ```
 
 ### Basic Usage
 
 ```bash
 # Convert a PDF to DOCX
-python cli.py convert input.pdf -o output.docx
+nassij convert input.pdf -o output.docx
+
+# Get info about a PDF before converting
+nassij --info input.pdf
+
+# Benchmark conversion
+nassij --benchmark input.pdf -o output.docx
 
 # Use accurate mode for scanned documents
-python cli.py convert input.pdf -o output.docx --mode accurate
-
-# Specify Arabic font
-python cli.py convert input.pdf -o output.docx --font "Noto Sans Arabic"
+nassij convert input.pdf -o output.docx --mode accurate
 
 # High-resolution OCR for scanned pages
-python cli.py convert input.pdf -o output.docx --dpi 400
+nassij convert input.pdf -o output.docx --dpi 400
 ```
 
 ---
@@ -67,29 +79,41 @@ python cli.py convert input.pdf -o output.docx --dpi 400
 | `--font` | Font name for Arabic text | `Arial` |
 | `--dpi` | DPI for scanned page conversion | `300` |
 
+### Global Options
+
+| Option | Description |
+|--------|-------------|
+| `--info` | Analyze PDF and report type (Scanned, Hybrid, Native) |
+| `--benchmark` | Run conversion and report time elapsed |
+
 ### Conversion Modes
 
 - **`fast`**: Text extraction only, skips scanned pages
-- **`balanced`**: Text extraction + OCR for scanned pages (recommended)
-- **`accurate`**: Full OCR processing with table detection
+- **`balanced`**: Text extraction + OCR for scanned pages (uses EasyOCR/PaddleOCR)
+- **`accurate`**: Full OCR processing with table detection and Image Preprocessing
 
 ---
 
 ## Architecture
 
-```
+```text
 nassij/
 ├── core/
 │   ├── pdf_reader.py          # Extract raw text + coords from PDF
-│   ├── ocr_engine.py          # PaddleOCR wrapper (text + tables)
+│   ├── image_preprocessor.py  # Deskew, Denoise, and Adaptive Binarization
+│   ├── engines/               # Strategy pattern for OCR
+│   │   ├── base_engine.py     # Base abstract class
+│   │   ├── easyocr_engine.py  # EasyOCR implementation
+│   │   └── paddle_engine.py   # PaddleOCR implementation (Text + Tables)
 │   ├── arabic_processor.py    # Ligatures + diacritics + RTL
 │   ├── table_handler.py       # Reconstruct tables from OCR boxes
+│   ├── layout_processor.py    # Block grouping and column detection
 │   └── docx_builder.py        # Generate RTL-compliant DOCX
 ├── utils/
 │   ├── unicode_helpers.py     # NFC normalization, diacritic regex
 │   └── metrics.py             # CER, WER, diacritics rate, ligature check
 ├── cli.py                     # Command-line interface
-├── requirements.txt           # Exact pinned versions
+├── pyproject.toml             # Modern package config
 └── README.md                  # This file
 ```
 
