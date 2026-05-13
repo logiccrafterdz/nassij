@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نسيج | Nassij</title>
+    <title>نسيج | Nassij Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Fonts: Amiri for Display/Serif, IBM Plex Arabic for modern UI/Sans, Cairo for contemporary, Fira Code for code -->
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=Cairo:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <!-- FontAwesome for icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=Cairo:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script>
@@ -20,19 +18,15 @@
                     colors: {
                         ink: '#08080a',
                         parchment: '#111113',
-                        copper: '#d4af37', // Refined gold/copper
-                        gold: '#e6c280',
+                        copper: '#d4af37',
                         teal: '#00f2fe',
-                        charcoal: '#1a1a1c'
+                        darkgray: '#141416'
                     },
                     fontFamily: {
                         sans: ['IBM Plex Sans Arabic', 'sans-serif'],
                         serif: ['Amiri', 'serif'],
                         cairo: ['Cairo', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace']
-                    },
-                    transitionTimingFunction: {
-                        'mythic': 'cubic-bezier(0.19, 1, 0.22, 1)',
+                        mono: ['JetBrains Mono', 'monospace']
                     }
                 }
             }
@@ -45,155 +39,159 @@
             color: #f1f5f9;
             overflow-x: hidden;
             margin: 0;
-            padding: 0;
             font-family: 'IBM Plex Sans Arabic', sans-serif;
             scroll-behavior: smooth;
         }
 
-        /* Generative Environment */
+        /* Ambient Environment */
         #bg-canvas {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 0; pointer-events: none; opacity: 0.6; mix-blend-mode: screen;
+            z-index: 0; pointer-events: none; opacity: 0.8; mix-blend-mode: screen;
         }
 
         .glow-radial {
-            position: fixed; top: 20%; left: 50%; width: 120vw; height: 120vh;
+            position: fixed; top: 20%; left: 50%; width: 150vw; height: 150vh;
             transform: translate(-50%, -50%);
-            background: radial-gradient(circle at center, rgba(212, 175, 55, 0.05) 0%, rgba(0, 242, 254, 0.015) 30%, transparent 60%);
+            background: radial-gradient(circle at center, rgba(212, 175, 55, 0.04) 0%, rgba(0, 242, 254, 0.015) 35%, transparent 70%);
             z-index: 1; pointer-events: none;
-        }
-
-        .bg-grid {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background-size: 60px 60px;
-            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
-            z-index: 0; pointer-events: none;
         }
 
         .z-content { position: relative; z-index: 10; }
 
-        /* Typography Polish */
-        .text-display { font-family: 'Amiri', serif; letter-spacing: -0.02em; line-height: 1.2; }
-        .text-ui { font-family: 'IBM Plex Sans Arabic', sans-serif; letter-spacing: 0.01em; }
-        
-        /* Header Logo Animation */
-        header { transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
+        /* Typography */
+        .text-display { font-family: 'Amiri', serif; letter-spacing: -0.01em; line-height: 1.3; }
+        .text-mono-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+
+        /* Header */
+        header { transition: all 0.5s ease; }
         header.scrolled {
-            background: rgba(8, 8, 10, 0.85); backdrop-filter: blur(20px);
+            background: rgba(8, 8, 10, 0.9); backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(212, 175, 55, 0.1); padding: 0.75rem 2rem;
         }
         
         .logo-svg path {
-            fill: none; stroke: url(#copperGradient); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
-            stroke-dasharray: 1200; stroke-dashoffset: 1200;
-            animation: drawLogo 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            fill: none; stroke: #d4af37; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+            stroke-dasharray: 1000; stroke-dashoffset: 1000;
+            animation: drawLogo 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
         @keyframes drawLogo {
-            0% { stroke-dashoffset: 1200; fill: transparent; }
-            70% { fill: transparent; }
+            0% { stroke-dashoffset: 1000; fill: transparent; }
+            80% { fill: transparent; }
             100% { stroke-dashoffset: 0; fill: #d4af37; stroke: transparent; }
         }
 
-        /* Nucleus of Conversion (Dropzone) */
+        /* Nucleus Theater (Dropzone) */
         .nucleus {
             position: relative; overflow: visible; transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-            border: 1px solid rgba(212, 175, 55, 0.15);
-            background: radial-gradient(circle at center, rgba(212, 175, 55, 0.03) 0%, transparent 70%);
+            border: 1px solid rgba(212, 175, 55, 0.1); border-radius: 2rem;
+            background: rgba(17, 17, 19, 0.6); backdrop-filter: blur(20px);
         }
-        .nucleus::before {
-            content: ''; position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.4), transparent, rgba(0, 242, 254, 0.2));
-            z-index: -1; border-radius: inherit; opacity: 0; transition: opacity 0.6s ease;
+        
+        /* The Magnetic Pull Effect on Hover */
+        .nucleus-overlay {
+            position: absolute; inset: -2px; border-radius: inherit; pointer-events: none;
+            background: linear-gradient(45deg, transparent, rgba(212, 175, 55, 0), transparent);
+            transition: all 0.5s ease; z-index: -1; opacity: 0;
         }
+        .nucleus:hover .nucleus-overlay {
+            opacity: 1;
+            background: linear-gradient(45deg, rgba(0, 242, 254, 0.1), rgba(212, 175, 55, 0.2), rgba(0, 242, 254, 0.1));
+            animation: borderFlow 3s linear infinite;
+        }
+        @keyframes borderFlow { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+
         .nucleus.drag-active {
-            transform: scale(0.98); border-color: rgba(0, 242, 254, 0.4);
-            box-shadow: 0 0 60px rgba(0, 242, 254, 0.15), inset 0 0 40px rgba(0, 242, 254, 0.05);
+            transform: scale(0.98); border-color: rgba(0, 242, 254, 0.5);
+            box-shadow: 0 0 60px rgba(0, 242, 254, 0.2), inset 0 0 30px rgba(0, 242, 254, 0.1);
         }
-        .nucleus.drag-active::before { opacity: 1; }
 
-        /* Motion System - Entrance Animations */
-        .stagger-item { opacity: 0; transform: translateY(30px) scale(0.98); filter: blur(5px); transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1); }
-        .stagger-item.in-view { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        .icon-pulse-hover { transition: all 0.4s ease; }
+        .nucleus:hover .icon-pulse-hover { transform: translateY(-10px) scale(1.1); color: #d4af37; filter: drop-shadow(0 0 15px rgba(212,175,55,0.4)); }
 
-        /* Buttons & Cards - Removing SaaS generic feel */
+        /* Mythic Button */
         .btn-mythic {
-            position: relative; overflow: hidden; background: transparent; border: 1px solid rgba(212, 175, 55, 0.4);
-            color: #d4af37; transition: all 0.4s ease; text-transform: uppercase; letter-spacing: 0.1em;
-        }
-        .btn-mythic::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
-            background: rgba(212, 175, 55, 0.1); transition: all 0.4s ease; z-index: -1;
-        }
-        .btn-mythic:hover { border-color: #d4af37; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
-        .btn-mythic:hover::after { height: 100%; }
-
-        .btn-primary {
             background: linear-gradient(135deg, #d4af37 0%, #b38b22 100%); color: #08080a;
             border: none; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2); transition: all 0.4s ease;
+            font-weight: 600;
         }
-        .btn-primary:hover { box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4); transform: translateY(-2px); }
+        .btn-mythic:hover { box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4); transform: translateY(-2px); }
 
-        .abstract-card {
-            background: rgba(26, 26, 28, 0.4); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.03); border-top: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); cursor: pointer;
+        /* Staggered Entries */
+        .stagger-item { opacity: 0; transform: translateY(20px); transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1); }
+        .stagger-item.in-view { opacity: 1; transform: translateY(0); }
+        .delay-100 { transition-delay: 100ms; } .delay-200 { transition-delay: 200ms; }
+
+        /* Interactive Quality Slider */
+        .slider-wrapper { 
+            position: relative; width: 100%; max-width: 900px; height: 500px; margin: 0 auto; 
+            overflow: hidden; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            cursor: ew-resize; /* Entire container acts as slider surface */
         }
-        .abstract-card:hover { background: rgba(26, 26, 28, 0.8); transform: translateY(-5px); border-color: rgba(212, 175, 55, 0.2); }
-        .abstract-card.active { border-color: #d4af37; background: rgba(212, 175, 55, 0.05); }
-
-        /* Quality Slider */
-        .slider-wrapper { position: relative; width: 100%; max-width: 900px; height: 500px; margin: 0 auto; overflow: hidden; border-radius: 4px; box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
-        .slider-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 40px; font-family: 'Amiri', serif; }
-        .slider-before { clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%); background: #fdfbf7; color: #2c2a25; filter: sepia(0.3) contrast(1.1) brightness(0.9); }
-        .slider-before::after { content:''; position:absolute; top:0;left:0;width:100%;height:100%; background:url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.15"/></svg>'); pointer-events:none; }
+        .slider-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 40px; }
         
-        .slider-after { background: #ffffff; color: #111; }
+        .slider-after { background: #ffffff; color: #111; z-index: 1; }
         
-        .slider-handle { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: #d4af37; transform: translateX(-50%); cursor: ew-resize; z-index: 20; box-shadow: 0 0 10px rgba(212,175,55,0.5); }
-        .slider-handle-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #08080a; border: 2px solid #d4af37; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d4af37; font-size: 12px; transition: transform 0.2s; }
-        .slider-wrapper:hover .slider-handle-icon { transform: translate(-50%, -50%) scale(1.1); }
+        .slider-before { 
+            background: #fcf9f2; color: #333; z-index: 2;
+            clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+            border-right: 2px solid #d4af37;
+        }
+        /* Scanned PDF effect */
+        .slider-before::after {
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.08"/></svg>');
+        }
+        
+        .slider-handle-icon { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            width: 44px; height: 44px; background: #08080a; border: 2px solid #d4af37; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; color: #d4af37; 
+            font-size: 14px; box-shadow: 0 0 20px rgba(212,175,55,0.4); z-index: 10;
+            pointer-events: none; /* Let the container handle drag */
+        }
 
-        /* Code Block */
-        .terminal-block { background: #0b0c10; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 20px 40px rgba(0,0,0,0.4); position: relative; }
-        .terminal-header { background: #111113; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; gap: 8px; align-items: center; }
+        /* Developer Terminal */
+        .terminal {
+            background: #0b0c10; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 20px 50px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+        .terminal-header {
+            background: #111113; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; gap: 8px; align-items: center;
+        }
         .mac-btn { width: 12px; height: 12px; border-radius: 50%; }
+
+        /* Font Specimen Frame */
+        .font-specimen {
+            background: linear-gradient(180deg, #111113 0%, #0a0a0c 100%);
+            border: 1px solid rgba(212,175,55,0.15);
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .font-specimen::before {
+            content: ''; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.03); pointer-events: none;
+        }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #08080a; }
-        ::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); }
-
-        /* Conversion sequence */
-        .particle-doc { position: absolute; width: 4px; height: 4px; background: #d4af37; border-radius: 50%; opacity: 0; pointer-events: none; }
-        .pipeline-glow { stroke-dasharray: 100; stroke-dashoffset: 100; animation: dashFlow 2s linear infinite; }
-        @keyframes dashFlow { to { stroke-dashoffset: 0; } }
-
-        /* Typography utilities */
-        .tracking-widest-arab { letter-spacing: 0.1em; }
+        ::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.4); }
     </style>
 </head>
 <body>
 
-    <div class="bg-grid"></div>
     <div class="glow-radial"></div>
     <canvas id="bg-canvas"></canvas>
 
     <div class="z-content">
-        <!-- 1. HEADER -->
+        <!-- HEADER -->
         <header id="main-header" class="fixed top-0 w-full z-50 px-8 py-6 flex justify-between items-center">
-            <div class="flex items-end gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
-                <!-- Exclusively Arabic SVG Wordmark as the Hero Logo -->
-                <svg class="logo-svg w-32 h-12" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="copperGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#e6c280" />
-                            <stop offset="50%" stop-color="#d4af37" />
-                            <stop offset="100%" stop-color="#a68420" />
-                        </linearGradient>
-                    </defs>
+            <div class="flex flex-col items-center cursor-pointer" onclick="window.scrollTo(0,0)">
+                <svg class="logo-svg w-28 h-12" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Arabic Nassij Logo -->
                     <path d="M160,30 C160,50 140,60 120,50" />
                     <circle cx="140" cy="20" r="3" fill="#d4af37" />
                     <path d="M120,50 C110,60 100,50 90,50 C80,50 75,40 70,50" />
@@ -203,419 +201,274 @@
                     <path d="M40,50 C50,40 30,30 20,30 C10,30 0,40 10,60 C20,80 40,70 50,60" />
                     <circle cx="25" cy="50" r="3" fill="#d4af37" />
                 </svg>
-                <span class="font-mono text-[10px] text-white/30 mb-1 opacity-0 animate-[fadeInUp_1s_ease_2s_forwards]">NASSIJ v2</span>
+                <span class="text-mono-tag mt-1 opacity-0 animate-[fadeIn_1s_ease_2.5s_forwards]">NASSIJ ENGINE V2.0</span>
             </div>
             
-            <nav class="hidden md:flex gap-10 text-sm font-ui text-white/60">
+            <nav class="hidden md:flex gap-10 text-sm text-white/60">
                 <a href="#why" class="hover:text-copper transition-colors">فلسفة نسيج</a>
                 <a href="#intelligence" class="hover:text-copper transition-colors">كيف يعمل؟</a>
-                <a href="#quality" class="hover:text-copper transition-colors">دقة التحويل</a>
+                <a href="#quality" class="hover:text-copper transition-colors">إثبات الجودة</a>
                 <a href="#dev" class="hover:text-copper transition-colors">للمطورين</a>
             </nav>
 
-            <div class="flex items-center gap-6">
-                <button class="text-white/40 hover:text-gold transition-colors"><i class="fa-regular fa-moon"></i></button>
-                <a href="#hero" class="hidden md:block btn-mythic px-6 py-2 rounded text-xs">
-                    ابدأ النسج الآن
-                </a>
-            </div>
+            <a href="#hero" class="hidden md:block btn-mythic px-6 py-2 rounded-full text-xs tracking-widest uppercase">
+                ابدأ النسج
+            </a>
         </header>
 
-        <!-- 2. SCENE: HERO (The Nucleus) -->
-        <section id="hero" class="relative min-h-screen flex flex-col items-center justify-center pt-32 px-4">
+        <!-- HERO SCENE -->
+        <section id="hero" class="relative min-h-screen flex flex-col items-center justify-center pt-32 px-4 pb-16">
             
             <div class="text-center max-w-4xl mx-auto mb-16 stagger-item">
-                <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-copper/10 bg-copper/5 text-copper text-xs font-ui mb-8 tracking-wide">
-                    <span class="w-1.5 h-1.5 rounded-full bg-teal shadow-[0_0_8px_#00f2fe] animate-pulse"></span>
-                    السامي المستقبلي - مختبر تحويل المستندات العربية
-                </div>
-                <!-- Cinematic H1 -->
-                <h1 class="text-5xl md:text-7xl font-bold text-display leading-tight mb-8 text-white">
-                    نسج المستندات من <span class="font-mono text-teal font-normal text-4xl md:text-6xl mx-2">PDF</span> إلى <span class="font-mono text-copper font-normal text-4xl md:text-6xl mx-2">DOCX</span> بدقة عربية خالصة
+                <h1 class="text-4xl md:text-6xl font-display text-white leading-[1.4] mb-6">
+                    نسج المستندات من <span class="font-mono text-teal font-light mx-1">PDF</span> إلى <span class="font-mono text-copper font-light mx-1">DOCX</span> بدقة عربية خالصة
                 </h1>
-                <p class="text-xl text-white/50 font-ui leading-relaxed max-w-2xl mx-auto font-light">
-                    “نسيج” يفكّك مستندك، يفهم تخطيطه، ثم يعيد كتابته كملف Word يحترم الحرف العربي، التشكيل، والجداول المعقدة.
+                <p class="text-lg text-white/50 leading-relaxed max-w-2xl mx-auto font-light">
+                    “نسيج” يفكّك مستندك، يفهم هندسته المكانية، ثم يعيد بناءه كوثيقة حيّة تحترم الحرف العربي والجداول المعقدة.
                 </p>
             </div>
 
-            <!-- The Stage / Nucleus -->
-            <div class="w-full max-w-5xl relative flex flex-col lg:flex-row gap-0 items-stretch stagger-item">
-                
-                <!-- Connection Path (Desktop) -->
-                <div class="hidden lg:flex flex-col items-center justify-center w-16 relative">
-                    <svg width="2" height="100%" class="absolute top-0 left-1/2 -translate-x-1/2">
-                        <line x1="1" y1="0" x2="1" y2="100%" stroke="rgba(255,255,255,0.05)" stroke-width="2" />
-                        <line x1="1" y1="0" x2="1" y2="100%" stroke="#00f2fe" stroke-width="2" class="pipeline-glow" />
-                    </svg>
-                    <div class="z-10 bg-ink p-2 rounded-full border border-white/10 text-white/30 text-xl mb-auto mt-20"><i class="fa-thin fa-file-pdf"></i></div>
-                    <div class="z-10 bg-ink p-2 rounded-full border border-teal/30 text-teal text-xl shadow-[0_0_15px_rgba(0,242,254,0.2)]"><i class="fa-solid fa-microchip"></i></div>
-                    <div class="z-10 bg-ink p-2 rounded-full border border-copper/30 text-copper text-xl mt-auto mb-20"><i class="fa-thin fa-file-word"></i></div>
-                </div>
-
-                <!-- Main Theater -->
-                <div class="flex-1 nucleus rounded-[2rem] p-1 shadow-2xl relative" id="drop-container">
-                    <div class="absolute inset-0 bg-parchment/60 backdrop-blur-2xl rounded-[inherit] -z-10"></div>
+            <!-- Nucleus Dropzone -->
+            <div class="w-full max-w-3xl stagger-item delay-100">
+                <div class="nucleus" id="drop-container">
+                    <div class="nucleus-overlay"></div>
                     
-                    <!-- View: Upload -->
-                    <div id="view-upload" class="p-10 md:p-16 h-full flex flex-col justify-center items-center transition-opacity duration-700">
-                        <div id="dropzone" class="w-full min-h-[300px] flex flex-col items-center justify-center cursor-pointer relative z-10 group">
-                            <div class="text-6xl text-copper/30 mb-8 transition-all duration-500 transform group-hover:scale-110 group-hover:text-copper/60" id="drop-icon">
+                    <!-- Upload State -->
+                    <div id="view-upload" class="p-12 md:p-20 flex flex-col justify-center items-center text-center transition-opacity duration-500">
+                        <div id="dropzone" class="w-full cursor-pointer relative z-10 group">
+                            <div class="text-6xl text-copper/30 mb-6 icon-pulse-hover" id="drop-icon">
                                 <i class="fa-thin fa-arrow-down-to-bracket"></i>
                             </div>
-                            <h2 id="drop-title" class="text-3xl font-display text-white mb-4 tracking-wide">مسرح النسج</h2>
-                            <p id="drop-desc" class="text-white/40 text-sm font-ui tracking-wider uppercase">اسحب المستند إلى هنا أو انقر للاستدعاء</p>
+                            <h2 id="drop-title" class="text-3xl font-display text-white mb-3">مسرح النسج</h2>
+                            <p id="drop-desc" class="text-white/40 text-sm tracking-widest uppercase">اسحب المستند إلى النواة أو انقر للاستدعاء</p>
                             <input type="file" id="fileInput" class="hidden" accept=".pdf">
                         </div>
-                        <div class="flex justify-center w-full mt-8 opacity-0 transform translate-y-4 transition-all duration-500" id="action-area">
-                            <button id="convert-btn" class="btn-primary py-4 px-12 rounded-full font-ui font-semibold text-lg flex items-center gap-4">
-                                بدء التفكيك وإعادة النسج <i class="fa-solid fa-arrow-left text-sm"></i>
+                        
+                        <div class="mt-10 opacity-0 transform translate-y-4 transition-all duration-500 w-full" id="action-area">
+                            <button id="convert-btn" class="btn-mythic w-full py-4 rounded-full text-lg flex items-center justify-center gap-4">
+                                بدء تفكيك وإعادة نسج المستند <i class="fa-solid fa-arrow-left"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- View: Micro-Sequence Processing -->
-                    <div id="view-processing" class="hidden p-12 h-full flex-col justify-center items-center transition-opacity duration-700 min-h-[400px]">
-                        <!-- Visualizer -->
-                        <div class="relative w-40 h-40 mb-12 flex items-center justify-center">
-                            <!-- Scanning rings -->
-                            <div class="absolute inset-0 border border-teal/10 rounded-full animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
-                            <div class="absolute inset-4 border border-copper/20 rounded-full animate-[spin_4s_linear_infinite]"></div>
-                            <div class="absolute inset-8 border border-t-teal border-r-transparent border-b-copper border-l-transparent rounded-full animate-[spin_2s_linear_infinite_reverse]"></div>
+                    <!-- Processing State -->
+                    <div id="view-processing" class="hidden p-16 flex-col justify-center items-center transition-opacity duration-500">
+                        <div class="relative w-32 h-32 mb-10 flex items-center justify-center">
+                            <div class="absolute inset-0 border border-teal/20 rounded-full animate-[ping_3s_ease-out_infinite]"></div>
+                            <div class="absolute inset-4 border border-t-copper border-r-transparent border-b-transparent border-l-transparent rounded-full animate-[spin_2s_linear_infinite]"></div>
                             
-                            <!-- Central Icon shifting -->
                             <i id="seq-icon-1" class="fa-thin fa-file-pdf text-4xl text-white/50 absolute transition-opacity duration-500"></i>
                             <i id="seq-icon-2" class="fa-solid fa-microchip text-4xl text-teal absolute opacity-0 transition-opacity duration-500"></i>
                             <i id="seq-icon-3" class="fa-thin fa-table-cells text-4xl text-copper absolute opacity-0 transition-opacity duration-500"></i>
                         </div>
                         
-                        <h3 class="text-2xl font-display text-white mb-3 tracking-wide" id="process-title">جاري استقراء المخطوطة...</h3>
-                        <p class="text-sm text-teal font-mono mb-10 tracking-widest uppercase" id="process-detail">INITIATING_ENGINE</p>
+                        <h3 class="text-2xl font-display text-white mb-2" id="process-title">استقراء البنية الهندسية...</h3>
+                        <p class="text-xs text-teal font-mono tracking-widest mb-8" id="process-detail">INITIATING</p>
                         
-                        <div class="w-full max-w-sm h-1 bg-ink rounded-full overflow-hidden">
-                            <div id="progress-bar" class="h-full w-0 bg-gradient-to-r from-transparent via-teal to-copper transition-all duration-300 ease-out"></div>
+                        <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full w-0 bg-gradient-to-r from-transparent via-teal to-copper transition-all duration-300"></div>
                         </div>
                     </div>
 
-                    <!-- View: Success -->
-                    <div id="view-success" class="hidden p-12 h-full flex-col justify-center items-center transition-opacity duration-700 min-h-[400px]">
-                        <div class="mb-8 relative">
-                            <div class="absolute inset-0 bg-teal/20 blur-xl rounded-full"></div>
-                            <div class="w-24 h-24 bg-ink border border-teal/40 rounded-full flex items-center justify-center text-teal text-4xl relative z-10">
-                                <i class="fa-light fa-check"></i>
-                            </div>
+                    <!-- Success State -->
+                    <div id="view-success" class="hidden p-16 flex-col justify-center items-center transition-opacity duration-500">
+                        <div class="w-20 h-20 bg-teal/10 border border-teal/30 rounded-full flex items-center justify-center text-teal text-3xl mb-6 shadow-[0_0_30px_rgba(0,242,254,0.2)]">
+                            <i class="fa-light fa-check"></i>
                         </div>
-                        <h2 class="text-3xl font-display text-white mb-3">اكتملت البنية</h2>
-                        <p class="text-white/40 mb-12 font-ui text-center max-w-sm">تم نسج المستند بنجاح وهو الآن جاهز بصيغته الرقمية القابلة للتحرير.</p>
+                        <h2 class="text-3xl font-display text-white mb-3">اكتمل النسج بنجاح</h2>
+                        <p class="text-white/40 mb-10 font-light">المستند الآن حيّ وقابل للتحرير.</p>
                         
-                        <div class="flex flex-col sm:flex-row gap-4 w-full justify-center">
-                            <button id="reset-btn" class="btn-mythic py-3 px-8 rounded-full text-sm font-ui">
-                                استدعاء مستند آخر
+                        <div class="flex gap-4 w-full">
+                            <button id="reset-btn" class="flex-1 border border-white/10 hover:bg-white/5 text-white py-3 rounded-full transition-colors text-sm">
+                                مستند جديد
                             </button>
-                            <a id="download-btn" href="#" class="btn-primary py-3 px-8 rounded-full font-ui flex items-center justify-center gap-3">
-                                استلام المخرجات <i class="fa-solid fa-arrow-down"></i>
+                            <a id="download-btn" href="#" class="flex-2 bg-teal text-ink font-bold py-3 px-8 rounded-full flex items-center justify-center gap-3 hover:bg-white transition-colors shadow-[0_0_20px_rgba(0,242,254,0.3)]">
+                                استلام المخرجات <i class="fa-solid fa-download"></i>
                             </a>
                         </div>
                     </div>
-
                 </div>
             </div>
         </section>
 
-        <!-- 3. INTELLIGENCE LAYER -->
-        <section id="intelligence" class="py-32 px-6 max-w-6xl mx-auto border-t border-white/5">
-            <div class="mb-16 stagger-item">
-                <p class="text-teal font-mono text-xs tracking-widest-arab mb-3">01 // LAYER OF INTELLIGENCE</p>
-                <h2 class="text-4xl font-display">طبقات الفهم البصري</h2>
-                <p class="text-white/40 font-ui mt-4 max-w-2xl text-lg">ليست كل المستندات متساوية التعقيد. اختر عمق التحليل المطلوب للمستند قبل بدء عملية النسج.</p>
+        <!-- INTELLIGENCE LAYER -->
+        <section id="intelligence" class="py-24 px-6 max-w-6xl mx-auto border-t border-white/5">
+            <div class="mb-16 stagger-item text-center">
+                <span class="text-mono-tag text-teal mb-4 block">01 // LAYER OF INTELLIGENCE</span>
+                <h2 class="text-4xl font-display mb-4">طبقات الفهم البصري</h2>
+                <p class="text-white/40 max-w-2xl mx-auto font-light">تحديد عمق التحليل المطلوب قبل بدء المعالجة.</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="modes-container">
-                <!-- Balanced -->
-                <div class="abstract-card active p-8 rounded-2xl stagger-item" data-mode="balanced">
-                    <div class="flex justify-between items-start mb-12">
-                        <i class="fa-thin fa-layer-group text-3xl text-copper"></i>
-                        <span class="text-[10px] font-mono border border-copper/30 text-copper px-2 py-1 rounded">DEFAULT</span>
-                    </div>
-                    <h3 class="text-2xl font-display mb-4">الاستخراج الهجين</h3>
-                    <p class="text-sm text-white/50 leading-relaxed font-ui">يجمع بذكاء بين طبقة النص الرقمي الأصلية للمستند إن وجدت، ويكمّلها بمعالجة بصرية عالية الدقة للصفحات الممسوحة.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="modes-container">
+                <div class="bg-darkgray p-8 rounded-xl border border-white/5 cursor-pointer hover:border-copper/40 transition-colors stagger-item active-mode relative overflow-hidden group" data-mode="balanced">
+                    <div class="absolute inset-0 bg-copper/5 opacity-0 group-[.active-mode]:opacity-100 transition-opacity"></div>
+                    <i class="fa-thin fa-layer-group text-3xl mb-8 group-[.active-mode]:text-copper text-white/30 transition-colors"></i>
+                    <h3 class="text-xl font-bold mb-3 relative z-10">الاستخراج الهجين</h3>
+                    <p class="text-sm text-white/50 leading-relaxed relative z-10">يجمع بين النص الرقمي الأصلي ومعالجة الـ OCR للصور، وهو الأفضل والأسرع لمعظم الملفات.</p>
                 </div>
                 
-                <!-- Accurate -->
-                <div class="abstract-card p-8 rounded-2xl stagger-item delay-100" data-mode="accurate">
-                    <div class="flex justify-between items-start mb-12">
-                        <i class="fa-thin fa-border-none text-3xl text-white/30 transition-colors"></i>
-                        <span class="text-[10px] font-mono border border-white/10 text-white/30 px-2 py-1 rounded transition-colors">DEEP</span>
-                    </div>
-                    <h3 class="text-2xl font-display mb-4">فهم التخطيط العميق</h3>
-                    <p class="text-sm text-white/50 leading-relaxed font-ui">يُفكّك البنية المعمارية للصفحة: يتتبع الأعمدة، الجداول المعقدة، والمسافات لإعادة بناء وثيقة تطابق الأصل تماماً.</p>
+                <div class="bg-darkgray p-8 rounded-xl border border-white/5 cursor-pointer hover:border-teal/40 transition-colors stagger-item delay-100 group" data-mode="accurate">
+                    <div class="absolute inset-0 bg-teal/5 opacity-0 group-[.active-mode]:opacity-100 transition-opacity"></div>
+                    <i class="fa-thin fa-border-none text-3xl mb-8 group-[.active-mode]:text-teal text-white/30 transition-colors"></i>
+                    <h3 class="text-xl font-bold mb-3 relative z-10">فهم التخطيط العميق</h3>
+                    <p class="text-sm text-white/50 leading-relaxed relative z-10">يفكك الهيكل المعماري للصفحة: يتتبع الأعمدة والجداول المدمجة لإعادة البناء بدقة مطلقة.</p>
                 </div>
 
-                <!-- Fast -->
-                <div class="abstract-card p-8 rounded-2xl stagger-item delay-200" data-mode="fast">
-                    <div class="flex justify-between items-start mb-12">
-                        <i class="fa-thin fa-bolt text-3xl text-white/30 transition-colors"></i>
-                        <span class="text-[10px] font-mono border border-white/10 text-white/30 px-2 py-1 rounded transition-colors">SPEED</span>
-                    </div>
-                    <h3 class="text-2xl font-display mb-4">التجريد السريع</h3>
-                    <p class="text-sm text-white/50 leading-relaxed font-ui">قراءة نصية فورية. مثالي للكتب والروايات حيث يهمّ النص النظيف المتدفق أكثر من الهيكل المكتبي المعقد.</p>
+                <div class="bg-darkgray p-8 rounded-xl border border-white/5 cursor-pointer hover:border-white/30 transition-colors stagger-item delay-200 group" data-mode="fast">
+                    <div class="absolute inset-0 bg-white/5 opacity-0 group-[.active-mode]:opacity-100 transition-opacity"></div>
+                    <i class="fa-thin fa-bolt text-3xl mb-8 group-[.active-mode]:text-white text-white/30 transition-colors"></i>
+                    <h3 class="text-xl font-bold mb-3 relative z-10">التجريد السريع</h3>
+                    <p class="text-sm text-white/50 leading-relaxed relative z-10">قراءة نصية فورية. مثالي للكتب والروايات حيث يهم النص المتدفق أكثر من الهيكل المكتبي.</p>
                 </div>
             </div>
             <input type="hidden" id="selected-mode" value="balanced">
         </section>
 
-        <!-- 4. FONT CHARACTER -->
-        <section class="py-32 px-6 max-w-6xl mx-auto border-t border-white/5">
-            <div class="flex flex-col lg:flex-row gap-16">
+        <!-- FONT CHARACTER -->
+        <section class="py-24 px-6 max-w-6xl mx-auto border-t border-white/5">
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
                 <div class="flex-1 stagger-item">
-                    <p class="text-copper font-mono text-xs tracking-widest-arab mb-3">02 // TYPOGRAPHIC SOUL</p>
+                    <span class="text-mono-tag text-copper mb-4 block">02 // TYPOGRAPHIC SOUL</span>
                     <h2 class="text-4xl font-display mb-6">هوية الحرف</h2>
-                    <p class="text-lg text-white/50 font-ui mb-12 leading-relaxed font-light">
-                        المخرجات الرقمية لا يجب أن تفقد روح اللغة. حدد "الشخصية الطباعية" التي سيُنسج بها مستندك النهائي.
-                    </p>
+                    <p class="text-lg text-white/50 mb-10 font-light">المخرجات الرقمية يجب أن تعكس شخصية النص. اختر النسق الطباعي للوثيقة النهائية.</p>
                     
-                    <div class="space-y-4" id="fonts-container">
-                        <!-- Font: Geometric -->
-                        <div class="abstract-card active p-5 rounded-xl flex items-center justify-between" data-font="Tajawal" data-preview-font="'IBM Plex Sans Arabic', sans-serif">
+                    <div class="flex flex-col gap-4" id="fonts-container">
+                        <div class="p-4 rounded-lg border border-copper/30 bg-copper/5 cursor-pointer flex justify-between items-center font-option active" data-font="Tajawal" data-preview="'IBM Plex Sans Arabic', sans-serif">
                             <div>
-                                <h4 class="font-bold font-ui text-lg">النسق الهندسي الواضح</h4>
-                                <p class="text-sm text-white/40 mt-1">حداثة، تقارير الشركات، العروض الرقمية</p>
+                                <h4 class="font-bold">النسق الهندسي الواضح</h4>
+                                <p class="text-xs text-white/40 mt-1">حداثة، تقارير، شاشات (IBM Plex)</p>
                             </div>
-                            <div class="w-5 h-5 rounded-full border border-copper flex items-center justify-center">
-                                <div class="w-2.5 h-2.5 bg-copper rounded-full"></div>
-                            </div>
+                            <div class="w-3 h-3 rounded-full bg-copper shadow-[0_0_10px_#d4af37] indicator"></div>
                         </div>
-                        
-                        <!-- Font: Traditional -->
-                        <div class="abstract-card p-5 rounded-xl flex items-center justify-between" data-font="Traditional Arabic" data-preview-font="'Amiri', serif">
+                        <div class="p-4 rounded-lg border border-white/10 cursor-pointer flex justify-between items-center font-option" data-font="Traditional Arabic" data-preview="'Amiri', serif">
                             <div>
-                                <h4 class="font-bold font-ui text-lg">النسق الوثائقي التراثي</h4>
-                                <p class="text-sm text-white/40 mt-1">الأبحاث الأكاديمية، الكتب، الوثائق الرسمية</p>
+                                <h4 class="font-bold">النسق الوثائقي التراثي</h4>
+                                <p class="text-xs text-white/40 mt-1">أبحاث، كتب، وثائق رسمية (Amiri)</p>
                             </div>
-                            <div class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center">
-                                <div class="w-2.5 h-2.5 bg-copper rounded-full opacity-0"></div>
-                            </div>
+                            <div class="w-3 h-3 rounded-full bg-transparent border border-white/30 indicator"></div>
                         </div>
-
-                        <!-- Font: Contemporary -->
-                        <div class="abstract-card p-5 rounded-xl flex items-center justify-between" data-font="Cairo" data-preview-font="'Cairo', sans-serif">
+                        <div class="p-4 rounded-lg border border-white/10 cursor-pointer flex justify-between items-center font-option" data-font="Cairo" data-preview="'Cairo', sans-serif">
                             <div>
-                                <h4 class="font-bold font-ui text-lg">النسق الطباعي المعاصر</h4>
-                                <p class="text-sm text-white/40 mt-1">المجلات، المقالات، النشر الحديث</p>
+                                <h4 class="font-bold">النسق الطباعي المعاصر</h4>
+                                <p class="text-xs text-white/40 mt-1">مجلات، نشر حديث (Cairo)</p>
                             </div>
-                            <div class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center">
-                                <div class="w-2.5 h-2.5 bg-copper rounded-full opacity-0"></div>
-                            </div>
+                            <div class="w-3 h-3 rounded-full bg-transparent border border-white/30 indicator"></div>
                         </div>
                     </div>
                     <input type="hidden" id="selected-font" value="Tajawal">
                 </div>
                 
-                <div class="flex-1 stagger-item delay-200">
-                    <div class="bg-parchment border border-white/5 rounded-2xl p-10 h-full flex flex-col relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 p-4 opacity-10 text-9xl font-serif pointer-events-none transition-transform duration-1000 group-hover:scale-110">ن</div>
-                        <div class="mb-auto">
-                            <span class="text-xs text-white/30 font-mono tracking-widest border border-white/10 px-2 py-1 rounded">LIVE PREVIEW</span>
-                        </div>
-                        <p id="font-preview" class="text-3xl leading-[1.8] text-white/90 mt-12 transition-all duration-500" style="font-family: 'IBM Plex Sans Arabic', sans-serif;">
+                <div class="flex-1 w-full stagger-item delay-100">
+                    <div class="font-specimen p-12 rounded-2xl flex flex-col justify-center items-center text-center min-h-[350px]">
+                        <span class="text-mono-tag border border-white/10 px-2 py-1 mb-8">LIVE PREVIEW</span>
+                        <p id="font-preview" class="text-2xl md:text-3xl leading-[1.8] text-white/90 transition-opacity duration-300" style="font-family: 'IBM Plex Sans Arabic', sans-serif;">
                             اللغة العربية لغة حيّة، قابلة للامتداد والتشكل. نسيج يحترم هذا البناء ويعيد صياغته رقمياً بدقة متناهية.
                         </p>
-                        <div class="mt-auto pt-12 flex items-center gap-4 text-white/20">
-                            <div class="h-px bg-white/10 flex-1"></div>
-                            <i class="fa-solid fa-feather-pointed"></i>
-                            <div class="h-px bg-white/10 flex-1"></div>
-                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 5. QUALITY PROOF (Slider & Metrics) -->
-        <section id="quality" class="py-32 px-4 relative overflow-hidden">
-            <div class="absolute inset-0 bg-ink/80 border-y border-white/5 -z-10"></div>
+        <!-- QUALITY PROOF -->
+        <section id="quality" class="py-32 px-4 relative">
+            <div class="absolute inset-0 bg-parchment/50 border-y border-white/5 -z-10"></div>
             
             <div class="max-w-6xl mx-auto">
-                <div class="text-center mb-20 stagger-item">
-                    <p class="text-teal font-mono text-xs tracking-widest-arab mb-3">03 // ABSOLUTE FIDELITY</p>
-                    <h2 class="text-4xl font-display mb-6">إثبات الجودة البصرية</h2>
-                    <p class="text-lg text-white/40 font-ui max-w-2xl mx-auto font-light">لا نكتفي باستخراج الحروف، بل نحافظ على التشكيل، العلاقات المكانية، وشبكة الجداول.</p>
+                <div class="text-center mb-16 stagger-item">
+                    <span class="text-mono-tag text-teal mb-4 block">03 // ABSOLUTE FIDELITY</span>
+                    <h2 class="text-4xl font-display mb-4">إثبات الجودة البصرية</h2>
+                    <p class="text-white/40 font-light">مقارنة تفاعلية حية بين مستند PDF ممسوح والنسخة المعالجة بواسطة نسيج.</p>
                 </div>
                 
-                <!-- Realistic Slider -->
-                <div class="slider-wrapper stagger-item delay-100" id="compare-slider">
-                    <!-- Right (After: DOCX) -->
+                <!-- Interactive Slider -->
+                <div class="slider-wrapper stagger-item delay-100" id="slider">
+                    <!-- Right/Base (DOCX) -->
                     <div class="slider-img slider-after" dir="rtl">
-                        <div class="flex justify-between items-end border-b-2 border-gray-100 pb-4 mb-8">
-                            <div>
-                                <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">مُقَدِّمَةٌ فِي النَّسِيجِ الحَيّ</h1>
-                                <p class="font-ui text-gray-500 text-sm">مستند رقمي مُعاد البناء (DOCX)</p>
-                            </div>
-                            <i class="fa-solid fa-file-word text-4xl text-blue-600"></i>
+                        <div class="flex justify-between items-center border-b-2 border-gray-100 pb-4 mb-6">
+                            <h1 class="text-2xl font-display font-bold text-gray-900">مُقَدِّمَةٌ فِي النَّسِيجِ الحَيّ</h1>
+                            <span class="text-sm font-bold text-teal-600 bg-teal-50 px-3 py-1 rounded">DOCX Output</span>
                         </div>
-                        <p class="text-lg leading-loose text-gray-800 font-serif mb-8 text-justify">
-                            إنَّ التَّحَوُّلَ الرَّقْمِيَّ لِلْمُخَطُوطاتِ العَرَبِيَّةِ لَا يَعْنِي فَقَط نَقْلَ الحَرْفِ، بَلْ يَسْتَوْجِبُ فَهْمَ <strong>البِنْيَةِ الهَنْدَسِيَّةِ</strong> لِلصَّفْحَةِ. الجَدْوَلُ التَّالِي يُوَضِّحُ دِقَّةَ الأَدَاءِ:
+                        <p class="text-lg leading-loose text-gray-800 font-serif mb-6">
+                            إنَّ التَّحَوُّلَ الرَّقْمِيَّ لَا يَعْنِي فَقَط نَقْلَ الحَرْفِ، بَلْ يَسْتَوْجِبُ فَهْمَ <strong>البِنْيَةِ الهَنْدَسِيَّةِ</strong>. الجَدْوَلُ التَّالِي يُوَضِّحُ دِقَّةَ الأَدَاءِ:
                         </p>
-                        <table class="w-full text-right border-collapse font-ui">
-                            <thead>
-                                <tr class="bg-gray-50 text-gray-700 text-sm">
-                                    <th class="border border-gray-200 p-4 w-1/3">المعيار</th>
-                                    <th class="border border-gray-200 p-4">النتيجة المُقاسة</th>
-                                    <th class="border border-gray-200 p-4 w-1/4">الحالة</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600">
-                                <tr>
-                                    <td class="border border-gray-200 p-4 font-bold">نسبة الخطأ (CER)</td>
-                                    <td class="border border-gray-200 p-4">أقل من 8% في المستندات المطبوعة</td>
-                                    <td class="border border-gray-200 p-4 text-teal-600"><i class="fa-solid fa-circle-check ml-2"></i>ممتاز</td>
-                                </tr>
-                                <tr>
-                                    <td class="border border-gray-200 p-4 font-bold">بقاء التشكيل</td>
-                                    <td class="border border-gray-200 p-4">يتم الحفاظ على الحركات الأساسية بنسبة عالية</td>
-                                    <td class="border border-gray-200 p-4 text-teal-600"><i class="fa-solid fa-circle-check ml-2"></i>مستقر</td>
-                                </tr>
-                            </tbody>
+                        <table class="w-full text-right border-collapse border border-gray-200">
+                            <tr class="bg-gray-50 text-sm"><th class="border border-gray-200 p-3">المعيار</th><th class="border border-gray-200 p-3">النتيجة</th></tr>
+                            <tr class="text-sm"><td class="border border-gray-200 p-3 font-bold">دقة החروف (CER)</td><td class="border border-gray-200 p-3 text-green-600">أقل من 8%</td></tr>
                         </table>
                     </div>
                     
-                    <!-- Left (Before: Scanned PDF) -->
+                    <!-- Left/Over (PDF) -->
                     <div class="slider-img slider-before" dir="rtl">
-                        <div class="flex justify-between items-end border-b-2 border-gray-300 pb-4 mb-8 opacity-80">
-                            <div>
-                                <h1 class="text-3xl font-display font-bold text-gray-900 mb-2" style="transform: skewX(-2deg);">مُقَدِّمَةٌ فِي النَّسِيجِ الحَيّ</h1>
-                                <p class="font-ui text-gray-600 text-sm">مستند ممسوح ضوئياً (Scanned PDF)</p>
-                            </div>
+                        <div class="flex justify-between items-center border-b-2 border-gray-300 pb-4 mb-6 opacity-70">
+                            <h1 class="text-2xl font-display font-bold text-gray-900" style="transform: skewX(-1deg);">مُقَدِّمَةٌ فِي النَّسِيجِ الحَيّ</h1>
+                            <span class="text-sm font-bold text-gray-600 bg-gray-200 px-3 py-1 rounded">Scanned PDF</span>
                         </div>
-                        <p class="text-lg leading-loose text-gray-800 font-serif mb-8 text-justify opacity-80" style="letter-spacing: -0.5px;">
-                            إنَّ التَّحَوُّلَ الرَّقْمِيَّ لِلْمُخَطُوطاتِ العَرَبِيَّةِ لَا يَعْنِي فَقَط نَقْلَ الحَرْفِ، بَلْ يَسْتَوْجِبُ فَهْمَ <strong>البِنْيَةِ الهَنْدَسِيَّةِ</strong> لِلصَّفْحَةِ. الجَدْوَلُ التَّالِي يُوَضِّحُ دِقَّةَ الأَدَاءِ:
+                        <p class="text-lg leading-loose text-gray-800 font-serif mb-6 opacity-70" style="letter-spacing:-0.3px;">
+                            إنَّ التَّحَوُّلَ الرَّقْمِيَّ لَا يَعْنِي فَقَط نَقْلَ الحَرْفِ، بَلْ يَسْتَوْجِبُ فَهْمَ <strong>البِنْيَةِ الهَنْدَسِيَّةِ</strong>. الجَدْوَلُ التَّالِي يُوَضِّحُ دِقَّةَ الأَدَاءِ:
                         </p>
-                        <table class="w-full text-right border-collapse font-ui opacity-70" style="transform: rotate(-0.5deg);">
-                            <thead>
-                                <tr class="bg-gray-200 text-gray-800 text-sm">
-                                    <th class="border border-gray-400 p-4 w-1/3">المعيار</th>
-                                    <th class="border border-gray-400 p-4">النتيجة المُقاسة</th>
-                                    <th class="border border-gray-400 p-4 w-1/4">الحالة</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-700">
-                                <tr>
-                                    <td class="border border-gray-400 p-4 font-bold">نسبة الخطأ (CER)</td>
-                                    <td class="border border-gray-400 p-4">أقل من 8% في المستندات المطبوعة</td>
-                                    <td class="border border-gray-400 p-4">ممتاز</td>
-                                </tr>
-                                <tr>
-                                    <td class="border border-gray-400 p-4 font-bold">بقاء التشكيل</td>
-                                    <td class="border border-gray-400 p-4">يتم الحفاظ على الحركات الأساسية بنسبة عالية</td>
-                                    <td class="border border-gray-400 p-4">مستقر</td>
-                                </tr>
-                            </tbody>
+                        <table class="w-full text-right border-collapse border border-gray-400 opacity-60" style="transform: rotate(-0.5deg);">
+                            <tr class="bg-gray-300 text-sm"><th class="border border-gray-400 p-3">المعيار</th><th class="border border-gray-400 p-3">النتيجة</th></tr>
+                            <tr class="text-sm"><td class="border border-gray-400 p-3 font-bold">دقة الحروف (CER)</td><td class="border border-gray-400 p-3">أقل من 8%</td></tr>
                         </table>
-                        <!-- Scanned artifacts -->
-                        <div class="absolute top-1/4 right-10 w-4 h-4 bg-black/30 rounded-full blur-[2px]"></div>
-                        <div class="absolute bottom-10 left-1/3 w-64 h-2 bg-black/20 transform rotate-6 blur-[3px]"></div>
-                        <div class="absolute top-1/2 left-20 w-10 h-40 bg-black/10 blur-[5px]"></div>
+                        <div class="absolute top-1/3 left-1/4 w-32 h-2 bg-black/10 blur-[2px] transform rotate-12"></div>
                     </div>
                     
-                    <div class="slider-handle" id="slider-handle">
-                        <div class="slider-handle-icon"><i class="fa-solid fa-arrows-left-right"></i></div>
-                    </div>
+                    <div class="slider-handle-icon" id="slider-icon"><i class="fa-solid fa-arrows-left-right"></i></div>
                 </div>
 
-                <!-- Minimalist Metrics -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mt-24 max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 max-w-4xl mx-auto border-t border-white/5 pt-16">
                     <div class="stagger-item text-center">
-                        <div class="text-5xl font-mono text-teal mb-4 font-light"><span class="counter" data-target="8">0</span>% <span class="text-2xl text-teal/40">></span></div>
-                        <h4 class="font-ui text-white/80 uppercase tracking-widest text-sm mb-2">Character Error Rate</h4>
-                        <p class="text-xs text-white/40 font-ui leading-relaxed">أدنى معدل خطأ لغوي بفضل عدم الاعتماد على المعادلات العشوائية.</p>
+                        <div class="text-4xl font-mono text-teal mb-2"><span class="text-xl text-teal/40"><</span> 8%</div>
+                        <h4 class="text-xs text-white/50 uppercase tracking-widest mb-1">Character Error Rate</h4>
+                        <p class="text-xs text-white/30 font-light">أدنى معدل خطأ لغوي بفضل عدم الاعتماد على الهيورستيكس العشوائية.</p>
                     </div>
                     <div class="stagger-item delay-100 text-center">
-                        <div class="text-5xl font-mono text-copper mb-4 font-light"><span class="text-2xl text-copper/40"><</span> <span class="counter" data-target="90">0</span>%</div>
-                        <h4 class="font-ui text-white/80 uppercase tracking-widest text-sm mb-2">Diacritics Preservation</h4>
-                        <p class="text-xs text-white/40 font-ui leading-relaxed">استعادة دقيقة للتشكيل (فتحة، ضمة، كسرة) للحفاظ على المعنى.</p>
+                        <div class="text-4xl font-mono text-copper mb-2"><span class="text-xl text-copper/40">></span> 90%</div>
+                        <h4 class="text-xs text-white/50 uppercase tracking-widest mb-1">Diacritics Preservation</h4>
+                        <p class="text-xs text-white/30 font-light">استعادة دقيقة للتشكيل للحفاظ على المعنى والسياق.</p>
                     </div>
                     <div class="stagger-item delay-200 text-center">
-                        <div class="text-5xl font-mono text-teal mb-4 font-light"><span class="text-2xl text-teal/40"><</span> <span class="counter" data-target="95">0</span>%</div>
-                        <h4 class="font-ui text-white/80 uppercase tracking-widest text-sm mb-2">Table Layout Fidelity</h4>
-                        <p class="text-xs text-white/40 font-ui leading-relaxed">بناء شبكي حقيقي لخلايا الجداول في وثائق Word النهائية.</p>
+                        <div class="text-4xl font-mono text-teal mb-2"><span class="text-xl text-teal/40">></span> 95%</div>
+                        <h4 class="text-xs text-white/50 uppercase tracking-widest mb-1">Table Layout Fidelity</h4>
+                        <p class="text-xs text-white/30 font-light">بناء شبكي حقيقي لخلايا الجداول المدمجة والمعقدة.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 6. WHY NASSIJ (Philosophy) -->
-        <section id="why" class="py-32 px-4 max-w-6xl mx-auto relative">
-            <div class="text-center mb-24 stagger-item">
-                <h2 class="text-4xl font-display text-white">أداة عربية المنشأ، <span class="text-copper italic">عالمية المستوى.</span></h2>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-                
-                <div class="stagger-item relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-b from-copper/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md"></div>
-                    <div class="h-full bg-ink p-10 rounded-2xl border border-white/5 relative z-10">
-                        <h3 class="text-2xl font-display mb-6 text-white group-hover:text-copper transition-colors">أصالة الجذور</h3>
-                        <p class="text-white/50 leading-loose text-sm font-ui font-light">
-                            لغة واجهة وخوارزميات صُممت للعربية من الجذر (RTL, Ligatures, Diacritics). ليست مجرد ترجمة لاحقة أو ترقيعاً لمحركات بُنيت للغات اللاتينية.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="stagger-item delay-100 relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-b from-teal/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md"></div>
-                    <div class="h-full bg-ink p-10 rounded-2xl border border-white/5 relative z-10">
-                        <h3 class="text-2xl font-display mb-6 text-white group-hover:text-teal transition-colors">الهندسة المورفولوجية</h3>
-                        <p class="text-white/50 leading-loose text-sm font-ui font-light">
-                            محرك فهم معماري يتتبع الأعمدة، الجداول المدمجة، والنصوص المتداخلة، ويعيد هندستها في هيكل DOCX برمجي دقيق يحترم اتجاه القراءة.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="stagger-item delay-200 relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-b from-copper/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md"></div>
-                    <div class="h-full bg-ink p-10 rounded-2xl border border-white/5 relative z-10">
-                        <h3 class="text-2xl font-display mb-6 text-white group-hover:text-copper transition-colors">سيادة تقنية</h3>
-                        <p class="text-white/50 leading-loose text-sm font-ui font-light">
-                            منتج محلي بالكامل يحفظ خصوصية مستنداتك، متوفر كمكتبة Python قوية، واجهة سطر أوامر (CLI)، وواجهة ويب لمختلف مستويات المستخدمين.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 7. DEVELOPERS -->
-        <section id="dev" class="py-32 px-4 relative">
-            <div class="absolute inset-0 bg-parchment border-y border-white/5 -z-10"></div>
-            <div class="max-w-5xl mx-auto flex flex-col lg:flex-row gap-16 items-center">
-                
+        <!-- DEVELOPERS (Pure Monospace) -->
+        <section id="dev" class="py-24 px-6 max-w-6xl mx-auto border-b border-white/5">
+            <div class="flex flex-col lg:flex-row gap-16 items-center">
                 <div class="flex-1 stagger-item">
-                    <p class="text-teal font-mono text-xs tracking-widest-arab mb-3">04 // BEYOND THE UI</p>
+                    <span class="text-mono-tag text-teal mb-4 block">04 // BEYOND THE UI</span>
                     <h2 class="text-4xl font-display mb-6">المحرك المفتوح</h2>
-                    <p class="text-lg text-white/50 font-ui mb-10 leading-relaxed font-light">
-                        هذه الواجهة هي مجرد قشرة. خلفها يقبع محرك "نسيج" البرمجي الجاهز للاندماج في أنظمتك عبر سطر الأوامر أو كحزمة Python.
+                    <p class="text-white/50 mb-10 font-light leading-relaxed">
+                        الواجهة مجرد قشرة. خلفها يقبع محرك "نسيج" البرمجي، متوفر كمكتبة Python قوية وـ CLI لتتكامل مع أنظمتك المعقدة.
                     </p>
-                    <div class="flex flex-wrap gap-3">
-                        <span class="text-xs font-mono bg-ink border border-white/10 px-4 py-2 rounded text-white/50"><i class="fa-brands fa-linux mr-2 text-white/70"></i> LINUX</span>
-                        <span class="text-xs font-mono bg-ink border border-white/10 px-4 py-2 rounded text-white/50"><i class="fa-brands fa-apple mr-2 text-white/70"></i> MACOS</span>
-                        <span class="text-xs font-mono bg-ink border border-white/10 px-4 py-2 rounded text-white/50"><i class="fa-brands fa-windows mr-2 text-teal/70"></i> WINDOWS</span>
+                    <div class="flex gap-3">
+                        <span class="text-xs font-mono border border-white/10 px-3 py-1.5 rounded bg-white/5"><i class="fa-brands fa-linux mr-2"></i>LINUX</span>
+                        <span class="text-xs font-mono border border-white/10 px-3 py-1.5 rounded bg-white/5"><i class="fa-brands fa-apple mr-2"></i>MACOS</span>
+                        <span class="text-xs font-mono border border-teal/30 text-teal px-3 py-1.5 rounded bg-teal/5"><i class="fa-brands fa-windows mr-2"></i>WINDOWS</span>
                     </div>
                 </div>
                 
-                <div class="flex-1 w-full stagger-item delay-200">
-                    <div class="terminal-block">
+                <div class="flex-1 w-full stagger-item delay-100">
+                    <div class="terminal">
                         <div class="terminal-header">
                             <div class="mac-btn bg-[#ff5f56]"></div>
                             <div class="mac-btn bg-[#ffbd2e]"></div>
                             <div class="mac-btn bg-[#27c93f]"></div>
-                            <span class="text-xs text-white/20 ml-auto font-mono">bash ~ nassij</span>
+                            <span class="text-[10px] text-white/30 ml-auto font-mono tracking-widest">BASH</span>
                         </div>
-                        <div class="p-8 overflow-x-auto relative group">
-<pre class="text-sm font-mono leading-[2]"><code class="text-white/70"><span class="text-teal/70"># تثبيت المحرك محلياً</span>
+                        <div class="p-6 overflow-x-auto relative group bg-[#0d0d10]">
+<pre class="text-sm font-mono leading-loose"><code class="text-white/80"><span class="text-white/30"># تثبيت المحرك محلياً</span>
 <span class="text-teal">pip</span> install nassij
 
-<span class="text-teal/70"># ترجمة المخطوطة إلى وثيقة ذكية</span>
+<span class="text-white/30"># ترجمة المخطوطة إلى وثيقة ذكية</span>
 <span class="text-copper">nassij</span> convert thesis.pdf -o thesis.docx \
   --mode accurate \
   --font <span class="text-teal">"Tajawal"</span></code></pre>
-                            <button class="absolute top-4 right-4 text-white/30 hover:text-white bg-white/5 p-2 rounded transition-colors opacity-0 group-hover:opacity-100 border border-white/10" title="نسخ الكود">
+                            <button class="absolute top-4 right-4 text-white/30 hover:text-white bg-white/10 border border-white/10 p-2 rounded transition-colors opacity-0 group-hover:opacity-100" title="نسخ الكود">
                                 <i class="fa-regular fa-copy"></i>
                             </button>
                         </div>
@@ -624,40 +477,30 @@
             </div>
         </section>
 
-        <!-- 8. FOOTER -->
-        <footer class="py-24 px-4 text-center relative overflow-hidden">
-            <!-- Decorative giant letter -->
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[30rem] font-serif text-white/[0.01] pointer-events-none select-none z-0">ن</div>
+        <!-- FOOTER -->
+        <footer class="py-20 px-4 text-center">
+            <h2 class="text-3xl font-display mb-10 text-white">هل أنت مستعد لنسج مستندك؟</h2>
+            <a href="#hero" class="inline-block btn-mythic font-bold py-4 px-12 rounded-full mb-16">
+                ابدأ النسج الآن
+            </a>
             
-            <div class="relative z-10 stagger-item">
-                <h2 class="text-4xl font-display mb-10 text-white">هل أنت مستعد لنسج مستندك؟</h2>
-                <a href="#hero" class="inline-block btn-primary text-ink font-bold font-ui py-4 px-10 rounded-full mb-16 text-lg">
-                    ابدأ النسج الآن
-                </a>
-                
-                <div class="flex flex-wrap justify-center gap-8 text-sm text-white/40 mb-12 font-ui tracking-wider uppercase">
-                    <a href="https://github.com/logiccrafterdz/nassij" class="hover:text-copper transition-colors">المستودع (GitHub)</a>
-                    <a href="#" class="hover:text-copper transition-colors">التوثيق الفني</a>
-                    <a href="#" class="hover:text-copper transition-colors">المساهمة</a>
-                </div>
-                
-                <p class="text-xs text-white/20 font-ui border-t border-white/5 pt-8 max-w-sm mx-auto font-light">
-                    مُطوّر بحب للحرف العربي، ومفتوح المصدر للمجتمع.<br><br><span class="font-mono tracking-widest">NASSIJ ENGINE V2.0</span>
-                </p>
-            </div>
+            <p class="text-xs text-white/20 font-light border-t border-white/5 pt-8 max-w-sm mx-auto">
+                مُطوّر بحب للحرف العربي، ومفتوح المصدر للمجتمع.<br><br>
+                <span class="font-mono tracking-widest">NASSIJ ENGINE V2.0</span>
+            </p>
         </footer>
     </div>
 
     <!-- SCRIPTS -->
     <script>
-        // Smooth Header Transition
+        // Header Transition
         window.addEventListener('scroll', () => {
             const header = document.getElementById('main-header');
             if (window.scrollY > 50) header.classList.add('scrolled');
             else header.classList.remove('scrolled');
         });
 
-        // Generative Flow Field Background (Arabic Script in Motion)
+        // Flow Field Canvas (Generative Background)
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -668,16 +511,13 @@
         function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize); resize();
 
-        class CharParticle {
+        class Particle {
             constructor() {
                 this.x = Math.random() * width; this.y = Math.random() * height;
-                this.size = Math.random() * 14 + 8;
+                this.size = Math.random() * 12 + 6;
                 this.char = arabicChars[Math.floor(Math.random() * arabicChars.length)];
-                this.baseOpacity = Math.random() * 0.1 + 0.02;
-                this.opacity = this.baseOpacity;
+                this.baseOpacity = Math.random() * 0.1 + 0.01; this.opacity = this.baseOpacity;
                 this.vx = (Math.random() - 0.5) * 0.1; this.vy = (Math.random() - 0.5) * 0.1;
-                this.angle = Math.random() * Math.PI * 2;
-                this.rotSpeed = (Math.random() - 0.5) * 0.002;
             }
             update() {
                 if (isDragging) {
@@ -685,33 +525,30 @@
                     const dist = Math.sqrt(dx*dx + dy*dy);
                     if (dist > 150) {
                         this.x += (dx / dist) * 2; this.y += (dy / dist) * 2;
-                        this.opacity = Math.min(0.4, this.baseOpacity * 3);
+                        this.opacity = Math.min(0.3, this.baseOpacity * 4);
                     }
                 } else {
-                    this.x += this.vx; this.y += this.vy; this.angle += this.rotSpeed;
-                    this.opacity = this.baseOpacity;
-                    if (this.x < -50) this.x = width + 50; if (this.x > width + 50) this.x = -50;
-                    if (this.y < -50) this.y = height + 50; if (this.y > height + 50) this.y = -50;
+                    this.x += this.vx; this.y += this.vy; this.opacity = this.baseOpacity;
+                    if (this.x < -20) this.x = width + 20; if (this.x > width + 20) this.x = -20;
+                    if (this.y < -20) this.y = height + 20; if (this.y > height + 20) this.y = -20;
                 }
             }
             draw() {
-                ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
                 ctx.fillStyle = `rgba(212, 175, 55, ${this.opacity})`;
                 ctx.font = `${this.size}px Amiri, serif`;
-                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                ctx.fillText(this.char, 0, 0); ctx.restore();
+                ctx.fillText(this.char, this.x, this.y);
             }
         }
 
-        for (let i = 0; i < 60; i++) particles.push(new CharParticle());
+        for (let i = 0; i < 50; i++) particles.push(new Particle());
 
         function animateBg() {
             ctx.clearRect(0, 0, width, height);
-            ctx.strokeStyle = 'rgba(212, 175, 55, 0.03)'; ctx.lineWidth = 0.5;
+            ctx.strokeStyle = 'rgba(212, 175, 55, 0.02)'; ctx.lineWidth = 0.5;
             for(let i=0; i<particles.length; i++) {
                 for(let j=i+1; j<particles.length; j++) {
                     const dx = particles[i].x - particles[j].x; const dy = particles[i].y - particles[j].y;
-                    if (Math.sqrt(dx*dx + dy*dy) < 120) {
+                    if (Math.sqrt(dx*dx + dy*dy) < 100) {
                         ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
                     }
                 }
@@ -721,113 +558,85 @@
         }
         animateBg();
 
-        // Scroll Intersection Observer for Animations
-        const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+        // Intersection Observer for Staggered Fades
         const observer = new IntersectionObserver((entries, obs) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('in-view');
-                    if(entry.target.querySelector('.counter')) runCounters(entry.target);
-                    obs.unobserve(entry.target);
-                }
+                if (entry.isIntersecting) { entry.target.classList.add('in-view'); obs.unobserve(entry.target); }
             });
-        }, observerOptions);
+        }, { threshold: 0.1 });
         document.querySelectorAll('.stagger-item').forEach(el => observer.observe(el));
 
-        // Quality Counters
-        function runCounters(parent) {
-            parent.querySelectorAll('.counter').forEach(counter => {
-                const target = +counter.dataset.target;
-                const duration = 2000; const steps = 60; const stepTime = duration / steps;
-                let current = 0;
-                const timer = setInterval(() => {
-                    current += target / steps;
-                    if (current >= target) { counter.innerText = target; clearInterval(timer); }
-                    else counter.innerText = Math.floor(current);
-                }, stepTime);
-            });
-        }
-
-        // Before/After Slider Logic
-        const sliderContainer = document.getElementById('compare-slider');
-        const sliderHandle = document.getElementById('slider-handle');
+        // Interactive Quality Slider
+        const slider = document.getElementById('slider');
         const sliderBefore = document.querySelector('.slider-before');
+        const sliderIcon = document.getElementById('slider-icon');
         let isSliding = false;
 
-        // Auto slide initially
+        // Auto move once
         setTimeout(() => {
-            if(!isSliding) {
-                sliderHandle.style.transition = 'left 1.5s cubic-bezier(0.19, 1, 0.22, 1)';
-                sliderBefore.style.transition = 'clip-path 1.5s cubic-bezier(0.19, 1, 0.22, 1)';
-                sliderHandle.style.left = '40%';
-                sliderBefore.style.clipPath = `polygon(0 0, 40% 0, 40% 100%, 0 100%)`;
-                setTimeout(() => {
-                    sliderHandle.style.transition = 'none';
-                    sliderBefore.style.transition = 'none';
-                }, 1500);
-            }
+            sliderBefore.style.transition = 'clip-path 1.5s ease-in-out';
+            sliderIcon.style.transition = 'left 1.5s ease-in-out';
+            sliderBefore.style.clipPath = `polygon(0 0, 45% 0, 45% 100%, 0 100%)`;
+            sliderIcon.style.left = '45%';
+            setTimeout(() => { sliderBefore.style.transition = 'none'; sliderIcon.style.transition = 'none'; }, 1500);
         }, 1000);
 
-        const slide = (e) => {
+        const handleSlide = (e) => {
             if (!isSliding) return;
-            let rect = sliderContainer.getBoundingClientRect();
-            let x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const rect = slider.getBoundingClientRect();
+            let x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
             let percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-            sliderHandle.style.left = percent + '%';
             sliderBefore.style.clipPath = `polygon(0 0, ${percent}% 0, ${percent}% 100%, 0 100%)`;
+            sliderIcon.style.left = percent + '%';
         };
 
-        sliderHandle.addEventListener('mousedown', () => isSliding = true);
-        sliderHandle.addEventListener('touchstart', () => isSliding = true, {passive: true});
+        slider.addEventListener('mousedown', () => isSliding = true);
+        slider.addEventListener('touchstart', () => isSliding = true, {passive: true});
         window.addEventListener('mouseup', () => isSliding = false);
         window.addEventListener('touchend', () => isSliding = false);
-        window.addEventListener('mousemove', slide);
-        window.addEventListener('touchmove', slide, {passive: true});
+        window.addEventListener('mousemove', handleSlide);
+        window.addEventListener('touchmove', handleSlide, {passive: true});
 
-        // Cards Interaction (Modes)
-        const modeCards = document.querySelectorAll('.mode-card, [data-mode]');
+        // Mode Selection
+        const modeCards = document.querySelectorAll('[data-mode]');
         const modeInput = document.getElementById('selected-mode');
         modeCards.forEach(card => {
             card.addEventListener('click', () => {
-                modeCards.forEach(c => {
-                    c.classList.remove('active');
-                    const icon = c.querySelector('i.text-3xl');
-                    if(icon) { icon.classList.remove('text-copper'); icon.classList.add('text-white/30'); }
-                });
-                card.classList.add('active');
-                const icon = card.querySelector('i.text-3xl');
-                if(icon) { icon.classList.add('text-copper'); icon.classList.remove('text-white/30'); }
+                modeCards.forEach(c => c.classList.remove('active-mode', 'border-copper/40', 'border-teal/40', 'border-white/30'));
+                card.classList.add('active-mode');
+                if(card.dataset.mode === 'balanced') card.classList.add('border-copper/40');
+                if(card.dataset.mode === 'accurate') card.classList.add('border-teal/40');
+                if(card.dataset.mode === 'fast') card.classList.add('border-white/30');
                 modeInput.value = card.dataset.mode;
             });
         });
 
-        // Cards Interaction (Fonts)
-        const fontCards = document.querySelectorAll('[data-font]');
+        // Font Selection
+        const fontCards = document.querySelectorAll('.font-option');
         const fontInput = document.getElementById('selected-font');
         const fontPreview = document.getElementById('font-preview');
         fontCards.forEach(card => {
             card.addEventListener('click', () => {
                 fontCards.forEach(c => {
-                    c.classList.remove('active');
-                    c.querySelector('.w-5').classList.replace('border-copper', 'border-white/20');
-                    c.querySelector('.w-2\\.5').classList.add('opacity-0');
+                    c.classList.remove('border-copper/30', 'bg-copper/5');
+                    c.classList.add('border-white/10');
+                    c.querySelector('.indicator').className = 'w-3 h-3 rounded-full bg-transparent border border-white/30 indicator';
                 });
-                card.classList.add('active');
-                card.querySelector('.w-5').classList.replace('border-white/20', 'border-copper');
-                card.querySelector('.w-2\\.5').classList.remove('opacity-0');
+                card.classList.add('border-copper/30', 'bg-copper/5');
+                card.classList.remove('border-white/10');
+                card.querySelector('.indicator').className = 'w-3 h-3 rounded-full bg-copper shadow-[0_0_10px_#d4af37] indicator';
+                
                 fontInput.value = card.dataset.font;
-                // Animate preview change
                 fontPreview.style.opacity = '0';
                 setTimeout(() => {
-                    fontPreview.style.fontFamily = card.dataset.previewFont;
+                    fontPreview.style.fontFamily = card.dataset.preview;
                     fontPreview.style.opacity = '1';
                 }, 300);
             });
         });
 
-        // Drag, Drop, & Conversion Core Logic
+        // Conversion Engine Core
         const dropContainer = document.getElementById('drop-container');
-        const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('fileInput');
         const convertBtn = document.getElementById('convert-btn');
         const actionArea = document.getElementById('action-area');
@@ -838,41 +647,28 @@
         
         let selectedFile = null; let checkStatusInterval;
 
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            document.body.addEventListener(eventName, e => e.preventDefault(), false);
-        });
-
-        document.body.addEventListener('dragover', () => { isDragging = true; });
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => document.body.addEventListener(ev, e => e.preventDefault()));
+        document.body.addEventListener('dragover', () => isDragging = true);
         document.body.addEventListener('dragleave', (e) => { if (!e.clientX && !e.clientY) isDragging = false; });
-        document.body.addEventListener('drop', () => { isDragging = false; });
+        document.body.addEventListener('drop', () => isDragging = false);
 
-        dropzone.addEventListener('dragover', () => dropContainer.classList.add('drag-active'));
-        dropzone.addEventListener('dragleave', () => dropContainer.classList.remove('drag-active'));
-        dropzone.addEventListener('drop', (e) => {
+        document.getElementById('dropzone').addEventListener('click', () => fileInput.click());
+        document.getElementById('dropzone').addEventListener('dragover', () => dropContainer.classList.add('drag-active'));
+        document.getElementById('dropzone').addEventListener('dragleave', () => dropContainer.classList.remove('drag-active'));
+        document.getElementById('dropzone').addEventListener('drop', (e) => {
             dropContainer.classList.remove('drag-active');
-            if (e.dataTransfer.files.length) handleFileSelect(e.dataTransfer.files[0]);
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
         });
-        dropzone.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) handleFileSelect(e.target.files[0]);
-        });
+        fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleFile(e.target.files[0]); });
 
-        function handleFileSelect(file) {
+        function handleFile(file) {
             if (file.type !== 'application/pdf') { alert('عذراً، يقبل النظام ملفات PDF فقط.'); return; }
             selectedFile = file;
             document.getElementById('drop-icon').innerHTML = '<i class="fa-solid fa-file-pdf text-teal"></i>';
             document.getElementById('drop-title').innerText = file.name;
-            document.getElementById('drop-desc').innerText = `حجم الملف: ${(file.size / (1024 * 1024)).toFixed(2)} MB`;
-            
-            // Show action area
+            document.getElementById('drop-desc').innerText = `الحجم: ${(file.size / (1024 * 1024)).toFixed(2)} MB`;
             actionArea.classList.remove('opacity-0', 'translate-y-4');
-            convertBtn.disabled = false;
         }
-
-        // Micro-sequence variables
-        const seq1 = document.getElementById('seq-icon-1');
-        const seq2 = document.getElementById('seq-icon-2');
-        const seq3 = document.getElementById('seq-icon-3');
 
         convertBtn.addEventListener('click', async () => {
             if (!selectedFile) return;
@@ -881,75 +677,50 @@
             formData.append('mode', modeInput.value);
             formData.append('font', fontInput.value);
 
-            // Hide Upload, Show Processing
             viewUpload.classList.add('hidden');
             viewProcessing.classList.remove('hidden'); viewProcessing.classList.add('flex');
             
-            // Start micro-sequence visual
-            seq1.classList.remove('opacity-0'); seq2.classList.add('opacity-0'); seq3.classList.add('opacity-0');
-
             try {
-                const response = await fetch('/api/convert', { method: 'POST', body: formData });
-                if (!response.ok) throw new Error('فشل إنشاء جلسة التحويل');
-                const data = await response.json();
+                const res = await fetch('/api/convert', { method: 'POST', body: formData });
+                if (!res.ok) throw new Error('فشل التوصيل بالمحرك');
+                const data = await res.json();
                 checkStatusInterval = setInterval(() => checkStatus(data.job_id), 1000);
-            } catch (error) {
-                alert('خطأ في النظام: ' + error.message); resetUI();
-            }
+            } catch (err) { alert('خطأ: ' + err.message); resetUI(); }
         });
 
         async function checkStatus(jobId) {
             try {
-                const response = await fetch(`/api/status/${jobId}`);
-                const data = await response.json();
+                const res = await fetch(`/api/status/${jobId}`);
+                const data = await res.json();
                 const pTitle = document.getElementById('process-title');
-                const pDetail = document.getElementById('process-detail');
                 const pBar = document.getElementById('progress-bar');
+                const s1 = document.getElementById('seq-icon-1'), s2 = document.getElementById('seq-icon-2'), s3 = document.getElementById('seq-icon-3');
                 
                 if (data.status === 'processing') {
                     const p = Math.max(5, data.progress);
                     pBar.style.width = `${p}%`;
-                    
-                    if (p < 40) {
-                        pTitle.innerText = "تفكيك البنية المكانية...";
-                        seq1.classList.remove('opacity-0'); seq2.classList.add('opacity-0'); seq3.classList.add('opacity-0');
-                    }
-                    else if (p < 80) {
-                        pTitle.innerText = "طبقة الذكاء (OCR)...";
-                        seq1.classList.add('opacity-0'); seq2.classList.remove('opacity-0'); seq3.classList.add('opacity-0');
-                    }
-                    else {
-                        pTitle.innerText = "إعادة النسج (DOCX)...";
-                        seq1.classList.add('opacity-0'); seq2.classList.add('opacity-0'); seq3.classList.remove('opacity-0');
-                    }
-                    pDetail.innerText = data.message;
+                    if (p < 40) { pTitle.innerText = "تفكيك البنية المكانية..."; s1.classList.remove('opacity-0'); s2.classList.add('opacity-0'); }
+                    else if (p < 80) { pTitle.innerText = "طبقة الذكاء (OCR)..."; s1.classList.add('opacity-0'); s2.classList.remove('opacity-0'); }
+                    else { pTitle.innerText = "إعادة النسج (DOCX)..."; s2.classList.add('opacity-0'); s3.classList.remove('opacity-0'); }
                 } 
                 else if (data.status === 'completed') {
-                    clearInterval(checkStatusInterval);
-                    pBar.style.width = '100%';
+                    clearInterval(checkStatusInterval); pBar.style.width = '100%';
                     setTimeout(() => {
                         viewProcessing.classList.add('hidden'); viewProcessing.classList.remove('flex');
                         viewSuccess.classList.remove('hidden'); viewSuccess.classList.add('flex');
                         document.getElementById('download-btn').href = data.download_url;
-                    }, 1000);
+                    }, 800);
                 }
-                else if (data.status === 'failed') {
-                    clearInterval(checkStatusInterval); alert('تعذر استكمال النسج: ' + data.message); resetUI();
-                }
-            } catch (e) { console.error("Connection lost", e); }
+                else if (data.status === 'failed') { clearInterval(checkStatusInterval); alert('تعذر النسج: ' + data.message); resetUI(); }
+            } catch (e) { console.error(e); }
         }
 
         document.getElementById('reset-btn').addEventListener('click', resetUI);
-
         function resetUI() {
             selectedFile = null; fileInput.value = '';
             document.getElementById('drop-icon').innerHTML = '<i class="fa-thin fa-arrow-down-to-bracket"></i>';
             document.getElementById('drop-title').innerText = 'مسرح النسج';
-            document.getElementById('drop-desc').innerText = 'اسحب المستند إلى هنا أو انقر للاستدعاء';
-            
             actionArea.classList.add('opacity-0', 'translate-y-4');
-            convertBtn.disabled = true;
-            
             viewSuccess.classList.add('hidden'); viewSuccess.classList.remove('flex');
             viewProcessing.classList.add('hidden'); viewProcessing.classList.remove('flex');
             viewUpload.classList.remove('hidden');
