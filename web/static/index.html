@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نسيج | Nassij Web UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        .drag-active {
+            border-color: #60a5fa !important;
+            background: rgba(96, 165, 250, 0.2) !important;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(to left, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+        
+        /* Spinner animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: #60a5fa;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4">
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl flex justify-between items-center py-6 mb-8">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-file-word text-4xl text-blue-400"></i>
+            <div>
+                <h1 class="text-3xl font-bold gradient-text">نسيج</h1>
+                <p class="text-sm text-gray-300 opacity-80">محول PDF العربي الأكثر دقة</p>
+            </div>
+        </div>
+        <div class="text-sm font-semibold bg-white/10 px-4 py-2 rounded-full border border-white/20">
+            الإصدار 2.0
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-4xl glass-panel rounded-3xl p-8 transition-all duration-500 relative overflow-hidden">
+        
+        <!-- Upload Section -->
+        <div id="upload-section" class="flex flex-col gap-6">
+            <div id="dropzone" class="border-2 border-dashed border-white/30 rounded-2xl p-12 text-center cursor-pointer hover:bg-white/5 transition-all duration-300 flex flex-col items-center justify-center gap-4">
+                <i class="fa-solid fa-cloud-arrow-up text-6xl text-blue-300 mb-2"></i>
+                <h2 class="text-2xl font-bold">اسحب ملف الـ PDF هنا</h2>
+                <p class="text-gray-300">أو اضغط لاختيار ملف من جهازك</p>
+                <input type="file" id="fileInput" class="hidden" accept=".pdf">
+            </div>
+
+            <!-- Options -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <div class="bg-black/20 p-5 rounded-xl border border-white/10">
+                    <label class="block text-sm font-bold text-blue-300 mb-3"><i class="fa-solid fa-gears mr-2"></i> وضع التحويل</label>
+                    <select id="mode-select" class="w-full bg-white/10 border border-white/20 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none appearance-none cursor-pointer">
+                        <option value="fast" class="text-black">سريع (نصوص فقط - لا يناسب الصور)</option>
+                        <option value="balanced" class="text-black" selected>متوازن (نصوص + OCR للصور)</option>
+                        <option value="accurate" class="text-black">دقيق جداً (تخطيط متقدم + جداول)</option>
+                    </select>
+                </div>
+                
+                <div class="bg-black/20 p-5 rounded-xl border border-white/10">
+                    <label class="block text-sm font-bold text-blue-300 mb-3"><i class="fa-solid fa-font mr-2"></i> نوع الخط</label>
+                    <select id="font-select" class="w-full bg-white/10 border border-white/20 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 outline-none appearance-none cursor-pointer">
+                        <option value="Arial" class="text-black">Arial (الافتراضي)</option>
+                        <option value="Times New Roman" class="text-black">Times New Roman</option>
+                        <option value="Calibri" class="text-black">Calibri</option>
+                        <option value="Traditional Arabic" class="text-black">Traditional Arabic</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="convert-btn" class="mt-4 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg transform transition hover:-translate-y-1 hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-3 text-lg">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> ابدأ التحويل
+            </button>
+        </div>
+
+        <!-- Processing Section -->
+        <div id="processing-section" class="hidden flex-col items-center justify-center py-12 gap-6">
+            <div class="spinner"></div>
+            <h2 class="text-2xl font-bold gradient-text">جاري المعالجة...</h2>
+            
+            <div class="w-full max-w-md bg-black/30 rounded-full h-4 border border-white/10 overflow-hidden relative">
+                <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-4 rounded-full transition-all duration-300 w-0"></div>
+            </div>
+            
+            <p id="status-text" class="text-gray-300 font-mono text-sm bg-black/20 px-4 py-2 rounded-lg border border-white/5">يتم الآن تهيئة المحرك...</p>
+        </div>
+
+        <!-- Success Section -->
+        <div id="success-section" class="hidden flex-col items-center justify-center py-12 gap-6 text-center">
+            <div class="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center border-4 border-green-500/50 text-green-400 mb-2">
+                <i class="fa-solid fa-check text-5xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-white">تم التحويل بنجاح!</h2>
+            <p class="text-gray-300 mb-4">ملف Word الخاص بك جاهز للتحميل.</p>
+            
+            <div class="flex gap-4 w-full md:w-auto">
+                <a id="download-btn" href="#" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-colors flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-download"></i> تحميل الملف
+                </a>
+                <button id="reset-btn" class="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-colors flex justify-center items-center gap-2 border border-white/20">
+                    <i class="fa-solid fa-rotate-left"></i> تحويل ملف آخر
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center text-sm text-white/50">
+        <p>مبني بكل فخر لدعم اللغة العربية | Nassij v2.0 &copy; 2026</p>
+    </footer>
+
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const convertBtn = document.getElementById('convert-btn');
+        
+        const uploadSection = document.getElementById('upload-section');
+        const processingSection = document.getElementById('processing-section');
+        const successSection = document.getElementById('success-section');
+        
+        const progressBar = document.getElementById('progress-bar');
+        const statusText = document.getElementById('status-text');
+        const downloadBtn = document.getElementById('download-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        
+        let selectedFile = null;
+        let checkStatusInterval = null;
+
+        // Drag & Drop Handling
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('drag-active');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('drag-active');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('drag-active');
+            if (e.dataTransfer.files.length) {
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+
+        dropzone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (file.type !== 'application/pdf') {
+                alert('عذراً، يدعم نسيج ملفات PDF فقط.');
+                return;
+            }
+            selectedFile = file;
+            dropzone.innerHTML = `
+                <i class="fa-solid fa-file-pdf text-5xl text-red-400 mb-2"></i>
+                <h3 class="text-xl font-bold text-white">${file.name}</h3>
+                <p class="text-sm text-gray-300">${(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                <p class="text-xs text-blue-300 mt-2 hover:underline">اضغط لتغيير الملف</p>
+            `;
+            convertBtn.disabled = false;
+        }
+
+        // Upload and Convert
+        convertBtn.addEventListener('click', async () => {
+            if (!selectedFile) {
+                alert('يرجى اختيار ملف أولاً.');
+                return;
+            }
+
+            const mode = document.getElementById('mode-select').value;
+            const font = document.getElementById('font-select').value;
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('mode', mode);
+            formData.append('font', font);
+
+            // Switch UI
+            uploadSection.classList.add('hidden');
+            processingSection.classList.remove('hidden');
+            progressBar.style.width = '5%';
+
+            try {
+                const response = await fetch('/api/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) throw new Error('فشل رفع الملف');
+                
+                const data = await response.json();
+                const jobId = data.job_id;
+                
+                // Start polling status
+                checkStatusInterval = setInterval(() => checkStatus(jobId), 1500);
+                
+            } catch (error) {
+                alert('حدث خطأ: ' + error.message);
+                resetUI();
+            }
+        });
+
+        async function checkStatus(jobId) {
+            try {
+                const response = await fetch(`/api/status/${jobId}`);
+                const data = await response.json();
+                
+                if (data.status === 'processing') {
+                    progressBar.style.width = `${Math.max(5, data.progress)}%`;
+                    statusText.textContent = data.message;
+                } 
+                else if (data.status === 'completed') {
+                    clearInterval(checkStatusInterval);
+                    progressBar.style.width = '100%';
+                    
+                    setTimeout(() => {
+                        processingSection.classList.add('hidden');
+                        successSection.classList.remove('hidden');
+                        downloadBtn.href = data.download_url;
+                    }, 500);
+                }
+                else if (data.status === 'failed') {
+                    clearInterval(checkStatusInterval);
+                    alert('فشلت عملية التحويل: ' + data.message);
+                    resetUI();
+                }
+            } catch (error) {
+                console.error("Status check failed", error);
+            }
+        }
+
+        resetBtn.addEventListener('click', resetUI);
+
+        function resetUI() {
+            selectedFile = null;
+            fileInput.value = '';
+            dropzone.innerHTML = `
+                <i class="fa-solid fa-cloud-arrow-up text-6xl text-blue-300 mb-2"></i>
+                <h2 class="text-2xl font-bold">اسحب ملف الـ PDF هنا</h2>
+                <p class="text-gray-300">أو اضغط لاختيار ملف من جهازك</p>
+            `;
+            
+            successSection.classList.add('hidden');
+            processingSection.classList.add('hidden');
+            uploadSection.classList.remove('hidden');
+            
+            progressBar.style.width = '0%';
+            statusText.textContent = 'يتم الآن تهيئة المحرك...';
+        }
+
+        // Initialize state
+        convertBtn.disabled = true;
+    </script>
+</body>
+</html>
