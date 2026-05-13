@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 
 from core.engines.base_engine import OCREngine
+from core.image_preprocessor import ImagePreprocessor
 
 class PaddleOCREngine(OCREngine):
     """
@@ -17,6 +18,7 @@ class PaddleOCREngine(OCREngine):
         self.table_engine = None
         self.structure_engine = None
         self.is_ready = False
+        self.preprocessor = ImagePreprocessor()
         
     def initialize(self) -> bool:
         """Initialize PaddleOCR models."""
@@ -127,10 +129,12 @@ class PaddleOCREngine(OCREngine):
     def _prepare_image(self, image_input: Any) -> np.ndarray:
         """Convert input (path or PIL) to numpy array for Paddle."""
         if isinstance(image_input, str):
-            return np.array(Image.open(image_input))
+            img = np.array(Image.open(image_input))
         elif isinstance(image_input, Image.Image):
-            return np.array(image_input)
+            img = np.array(image_input)
         elif isinstance(image_input, np.ndarray):
-            return image_input
+            img = image_input
         else:
             raise ValueError(f"Unsupported image type: {type(image_input)}")
+            
+        return self.preprocessor.process(img)

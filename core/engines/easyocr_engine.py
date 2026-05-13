@@ -4,6 +4,7 @@ from PIL import Image
 import logging
 
 from core.engines.base_engine import OCREngine
+from core.image_preprocessor import ImagePreprocessor
 
 class EasyOCREngine(OCREngine):
     """
@@ -16,6 +17,7 @@ class EasyOCREngine(OCREngine):
         self.use_gpu = use_gpu
         self.reader = None
         self.is_ready = False
+        self.preprocessor = ImagePreprocessor()
         
     def initialize(self) -> bool:
         """Initialize EasyOCR Reader."""
@@ -98,10 +100,12 @@ class EasyOCREngine(OCREngine):
     def _prepare_image(self, image_input: Any) -> np.ndarray:
         """Convert input to numpy array."""
         if isinstance(image_input, str):
-            return np.array(Image.open(image_input))
+            img = np.array(Image.open(image_input))
         elif isinstance(image_input, Image.Image):
-            return np.array(image_input)
+            img = np.array(image_input)
         elif isinstance(image_input, np.ndarray):
-            return image_input
+            img = image_input
         else:
             raise ValueError(f"Unsupported image type: {type(image_input)}")
+            
+        return self.preprocessor.process(img)
