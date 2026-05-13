@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nassij"
+version = "2.0.0"
+description = "High-accuracy PDF-to-DOCX converter specialized for Arabic language"
+readme = "README.md"
+authors = [
+    {name = "LogicCrafterDZ"}
+]
+license = {text = "MIT"}
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Text Processing :: Markup",
+    "Topic :: Office/Business",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "PyMuPDF>=1.23.0",
+    "python-bidi>=0.4.2",
+    "arabic-reshaper>=3.0.0",
+    "python-docx>=1.1.0",
+    "Pillow>=10.0.0",
+    "regex>=2023.10.3",
+    "easyocr",
+    "numpy>=1.24.0",
+    "torch",
+    "torchvision",
+    "opencv-python"
+]
+
+[project.optional-dependencies]
+paddle = [
+    "paddleocr>=2.7.0",
+    "paddlepaddle"
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0"
+]
+
+[project.scripts]
+nassij = "cli:main"
+
+[tool.setuptools.packages.find]
+include = ["core*", "utils*", "cli*"]
