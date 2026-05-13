@@ -183,35 +183,25 @@
 
     <div class="z-content">
         <!-- 1. HEADER -->
-        <header id="main-header" class="absolute top-0 w-full z-50 px-8 py-3 grid grid-cols-3 items-center border-b border-white/[0.03]">
+        <header id="main-header" class="absolute top-0 w-full z-50 px-8 py-10 flex justify-center items-center">
             
-            <!-- 1. Left: Navigation -->
-            <nav class="hidden md:flex gap-8 text-sm font-ui text-white/50 justify-start">
-                <a href="#why" class="hover:text-copper transition-colors">فلسفة نسيج</a>
-                <a href="#intelligence" class="hover:text-copper transition-colors">كيف يعمل؟</a>
-                <a href="#quality" class="hover:text-copper transition-colors">دقة التحويل</a>
-            </nav>
-
-            <!-- 2. Center: Logo (User's Calligraphy) -->
-            <div class="flex justify-center cursor-pointer" onclick="window.scrollTo(0,0)">
-                <img src="/static/nassij_transparent.png" class="h-28 md:h-36 w-auto drop-shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-transform duration-500 hover:scale-105" alt="نَسِيج" />
+            <!-- Center: Massive Logo (User's Calligraphy) -->
+            <div class="flex justify-center cursor-pointer w-full" onclick="window.scrollTo(0,0)">
+                <img src="/static/nassij_transparent.png" class="h-[300px] md:h-[450px] w-auto drop-shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-transform duration-700 hover:scale-105" alt="نَسِيج" />
             </div>
 
-            <!-- 3. Right: Actions -->
-            <div class="flex items-center gap-6 justify-end">
+            <!-- Dark Mode Toggle Floating -->
+            <div class="absolute right-10 top-10">
                 <button class="text-white/40 hover:text-gold transition-colors">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="miter"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="miter"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                 </button>
-                <a href="#hero" class="hidden md:block btn-mythic px-6 py-2.5 rounded text-xs tracking-wider">
-                    بدء النسج
-                </a>
             </div>
         </header>
 
         <!-- 2. SCENE: HERO (The Nucleus) -->
-        <section id="hero" class="relative min-h-screen flex flex-col items-center justify-center pt-32 px-4">
+        <section id="hero" class="relative min-h-screen flex flex-col items-center justify-center pt-[350px] md:pt-[500px] px-4">
             
-            <div class="text-center max-w-4xl mx-auto mb-16 stagger-item">
+            <div class="text-center max-w-4xl mx-auto mb-16 stagger-item z-10">
                 <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-copper/10 bg-copper/5 text-copper text-xs font-ui mb-8 tracking-wide">
                     <span class="w-1.5 h-1.5 rounded-full bg-teal shadow-[0_0_8px_#00f2fe] animate-pulse"></span>
                     محرك نسيج | الجيل الجديد لمعالجة المستندات العربية
