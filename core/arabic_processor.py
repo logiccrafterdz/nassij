@@ -13,7 +13,7 @@ from typing import Optional
 from bidi.algorithm import get_display
 import arabic_reshaper
 
-from utils.unicode_helpers import normalize_nfc, count_diacritics, is_arabic_char, is_likely_reversed_arabic
+from utils.unicode_helpers import normalize_nfc, count_diacritics, is_arabic_char
 
 
 class ArabicProcessor:
@@ -68,21 +68,9 @@ class ArabicProcessor:
         text = normalize_nfc(text)
         
         if logical:
-            # Step A: Word-level Reversal (Logical chars, LTR word sequence)
-            from utils.unicode_helpers import is_word_order_reversed
-            if is_word_order_reversed(text):
-                # Reverse the sequence of tokens
-                text = " ".join(text.split()[::-1])
-                
-            # Step B: Character-level Reversal (Visual Order)
-            if has_presentation_forms:
-                # Presentation forms are almost always in Visual Order
-                text = get_display(text)
-            else:
-                # Only reverse if it's confirmed reversed base sequence
-                if is_likely_reversed_arabic(text):
-                    text = get_display(text)
-            
+            # For DOCX (logical order), we just need standard Unicode normalization.
+            # Modern OCR engines (PaddleOCR/EasyOCR) output correct logical text.
+            # We don't need fragile heuristics to reverse text here.
             return normalize_nfc(text)
 
         # Step 2: Fix RTL direction using bidi algorithm

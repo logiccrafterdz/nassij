@@ -114,44 +114,7 @@ def is_arabic_char(char: str) -> bool:
             0xfe70 <= code <= 0xfeff)
 
 
-def is_likely_reversed_arabic(text: str) -> bool:
-    """Detect if characters are in visual order (reversed)."""
-    if not text: return False
-    words = text.split()
-    arabic_words = [w for w in words if any(is_arabic_char(c) for c in w)]
-    if not arabic_words: return False
-    
-    reversed_indicators = 0
-    total_checks = 0
-    for word in arabic_words:
-        w = re.sub(r'^[^\u0600-\u06FF]+|[^\u0600-\u06FF]+$', '', word)
-        if len(w) < 2: continue
-        total_checks += 1
-        if w[0] in ('ة', 'ى'): reversed_indicators += 1
-        if w.endswith('لا') and not w.startswith('ال'): reversed_indicators += 0.5
-            
-    return total_checks > 0 and (reversed_indicators / total_checks) > 0.3
 
-def is_word_order_reversed(text: str) -> bool:
-    """
-    Detect if words are in LTR order but characters are logical (RTL script).
-    Example: ')نسخة نسيج اختبار' vs 'اختبار نسيج (نسخة)'
-    """
-    if not text or len(text) < 5:
-        return False
-        
-    # Heuristic: Starts with ending punctuation
-    if text.strip().startswith(('!', '.', '؟', ')', ']', '}')):
-        return True
-        
-    # Heuristic: Ends with common starters (e.g. 'هذا', 'إن', 'بواسطة')
-    # Use simple list for now
-    starters = ['هذا', 'إن', 'اختبار', 'في', 'من']
-    words = text.split()
-    if words and words[-1] in starters and len(words) > 2:
-        return True
-        
-    return False
 
 
 def get_arabic_ratio(text: str) -> float:

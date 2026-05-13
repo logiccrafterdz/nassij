@@ -8,7 +8,7 @@ from pathlib import Path
 import io
 from PIL import Image
 
-from utils.unicode_helpers import is_likely_reversed_arabic, is_arabic_char
+from utils.unicode_helpers import is_arabic_char
 
 
 class PDFReader:
