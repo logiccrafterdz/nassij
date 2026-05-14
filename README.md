@@ -1,258 +1,179 @@
-# Nassij v2.0
+# 🧶 Nassij Engine V2.0
+## The Futuristic Semitic Document Weaver
 
-**A High-Accuracy PDF-to-DOCX Converter Specialized for Arabic Language**
-
----
-
-## Overview
-
-**Nassij** is a local-first, open-source tool that converts PDF documents (both text-based and scanned) into fully editable `.docx` files with **exceptional fidelity for Arabic content**, including:
-
-- Right-to-left (RTL) text direction
-- Arabic ligatures (e.g., "لا", "إلا", "الله")
-- Diacritics/tashkeel preservation (e.g., فَتْحَة, ضَمَّة)
-- Complex tables (merged cells, mixed Arabic/English, borderless)
-- Mixed-script paragraphs (Arabic + Latin)
-
-> **Key Principle**: Never sacrifice linguistic accuracy for speed. If a component fails, degrade gracefully—but never corrupt meaning.
+**Nassij** (Arabic for *Weaving*) is a next-generation Arabic document reconstruction engine. It doesn't just convert files; it re-weaves them. By combining high-precision OCR with culturally-rooted typography and institutional-grade layout logic, Nassij delivers the highest fidelity PDF-to-DOCX transformation available for the Arabic script.
 
 ---
 
-## Quick Start
+## 🏛️ Project Vision: "Futuristic Semitic"
+Nassij is built on the philosophy that Arabic technology shouldn't just be functional—it should be beautiful. Our **Futuristic Semitic** aesthetic treats the Arabic script as a living visual material, merging ancient calligraphic logic with modern minimalist structure.
+
+---
+
+## ✨ Key Features
+
+### 💎 Precision Reconstruction
+- **Institutional-Grade Fidelity**: Specialized handling for complex Arabic ligatures (e.g., "لا", "الله", "إلا").
+- **Diacritics Preservation**: Advanced regex and Unicode normalization to preserve tashkeel (>=90% accuracy).
+- **RTL Sovereignty**: Native Right-to-Left (RTL) enforcement at the XML level for Microsoft Word.
+
+### 🧠 Intelligence Layers
+- **Multi-Engine Strategy**: Seamless switching between EasyOCR and PaddleOCR PP-OCRv5.
+- **TableMagic**: Sophisticated reconstruction of complex, merged, and borderless tables.
+- **Local-First**: All processing happens on your machine. Privacy by design.
+
+### 🌐 Hybrid Interface
+- **Powerful CLI**: For developers and batch processing.
+- **Museum-Grade Web UI**: A stunning, dark-mode web interface built with FastAPI and Tailwind CSS, featuring a "Nucleus" drag-and-drop experience.
+
+---
+
+## 🚀 Quick Start
 
 ### Installation
 
-1. **Clone or download this repository**
-
-2. **Install using pip**:
+1. **Clone the repository**:
    ```bash
-   # Install with standard dependencies
+   git clone https://github.com/logiccrafterdz/nassij.git
+   cd nassij
+   ```
+
+2. **Install the engine**:
+   ```bash
+   # Standard install
    pip install -e .
    
-   # Install with PaddleOCR dependencies (recommended for accurate tables)
-   pip install -e .[paddle]
-   
-   # Install dev dependencies
-   pip install -e .[dev]
+   # With Web UI and OCR optimizations
+   pip install -e .[web,paddle]
    ```
 
-   > **Note**: PaddleOCR requires additional system dependencies. See [PaddleOCR Installation Guide](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.7/doc/doc_en/installation_en.md) for details. EasyOCR also requires PyTorch.
-
-3. **Verify installation**:
-   ```bash
-   nassij --help
-   # Or using python
-   python cli.py --help
-   ```
-
-### Basic Usage
-
+### Running the Web Interface
+Experience the "Futuristic Semitic" UI locally:
 ```bash
-# Convert a PDF to DOCX
+python web/app.py
+# Open http://127.0.0.1:8000
+```
+
+### CLI Usage
+```bash
+# Basic conversion
 nassij convert input.pdf -o output.docx
 
-# Get info about a PDF before converting
-nassij --info input.pdf
-
-# Benchmark conversion
-nassij --benchmark input.pdf -o output.docx
-
-# Use accurate mode for scanned documents
-nassij convert input.pdf -o output.docx --mode accurate
-
-# High-resolution OCR for scanned pages
-nassij convert input.pdf -o output.docx --dpi 400
+# High-accuracy mode for scanned manuscripts
+nassij convert input.pdf -o output.docx --mode accurate --dpi 400
 ```
 
 ---
 
-## Command-Line Options
-
-### `convert` Command
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `input` | Input PDF file path | *Required* |
-| `-o, --output` | Output DOCX file path | *Required* |
-| `--mode` | Conversion mode: `fast`, `balanced`, `accurate` | `balanced` |
-| `--preserve-diacritics` | Preserve Arabic diacritics (tashkeel) | `True` |
-| `--font` | Font name for Arabic text | `Arial` |
-| `--dpi` | DPI for scanned page conversion | `300` |
-
-### Global Options
-
-| Option | Description |
-|--------|-------------|
-| `--info` | Analyze PDF and report type (Scanned, Hybrid, Native) |
-| `--benchmark` | Run conversion and report time elapsed |
-
-### Conversion Modes
-
-- **`fast`**: Text extraction only, skips scanned pages
-- **`balanced`**: Text extraction + OCR for scanned pages (uses EasyOCR/PaddleOCR)
-- **`accurate`**: Full OCR processing with table detection and Image Preprocessing
-
----
-
-## Architecture
+## 🏗️ Architecture
 
 ```text
 nassij/
-├── core/
-│   ├── pdf_reader.py          # Extract raw text + coords from PDF
-│   ├── image_preprocessor.py  # Deskew, Denoise, and Adaptive Binarization
-│   ├── engines/               # Strategy pattern for OCR
-│   │   ├── base_engine.py     # Base abstract class
-│   │   ├── easyocr_engine.py  # EasyOCR implementation
-│   │   └── paddle_engine.py   # PaddleOCR implementation (Text + Tables)
-│   ├── arabic_processor.py    # Ligatures + diacritics + RTL
-│   ├── table_handler.py       # Reconstruct tables from OCR boxes
-│   ├── layout_processor.py    # Block grouping and column detection
-│   └── docx_builder.py        # Generate RTL-compliant DOCX
-├── utils/
-│   ├── unicode_helpers.py     # NFC normalization, diacritic regex
-│   └── metrics.py             # CER, WER, diacritics rate, ligature check
-├── cli.py                     # Command-line interface
-├── pyproject.toml             # Modern package config
-└── README.md                  # This file
+├── core/             # The Weaving Logic
+│   ├── pdf_reader.py # Coordinate-aware extraction
+│   ├── engines/      # OCR Strategies (Paddle, EasyOCR)
+│   ├── layout/       # Column and Block detection
+│   └── arabic/       # Ligatures & Bidi processing
+├── web/              # The Aesthetic Layer (FastAPI)
+├── utils/            # Quality Metrics & Unicode helpers
+└── cli.py            # The Developer Gateway
 ```
 
 ---
 
-## Key Features
-
-### 1. Arabic Text Processing
-
-Nassij uses a **strict, non-negotiable order** for Arabic text processing:
-
-1. Unicode NFC normalization (MUST be first)
-2. Bidi direction correction (`get_display`)
-3. Arabic reshaping (ligatures + connections)
-4. Final NFC normalization (after reshaping)
-
-This ensures:
-- Correct ligature formation ("لا", "إلا", "الله")
-- Proper RTL rendering in Microsoft Word
-- Diacritics preservation (>=90% target)
-
-### 2. OCR Engine
-
-- **PaddleOCR PP-OCRv5**: Best open-source Arabic OCR model (2025)
-- **PP-TableMagic**: Integrated table detection and reconstruction
-- **Offline-first**: No internet required at runtime
-
-### 3. RTL-Compliant DOCX
-
-- XML-level RTL enforcement (compatible with Microsoft Word)
-- Right-aligned paragraphs for Arabic text
-- Proper font configuration for RTL rendering
-
-### 4. Table Support
-
-- Automatic table detection from OCR
-- Merged cell support (heuristic-based)
-- Mixed Arabic/English cell content
-- Borderless table handling
-
----
-
-## Quality Metrics
-
-Nassij implements comprehensive quality metrics:
+## 📊 Quality Benchmarks
 
 | Metric | Target | Description |
 |-------|--------|-------------|
-| **CER** | < 0.08 | Character Error Rate (Levenshtein distance) |
-| **WER** | < 0.20 | Word Error Rate |
-| **Diacritics Preservation** | ≥ 90% | Tashkeel marks preserved |
-| **Ligature Accuracy** | 100% | Known ligatures unchanged |
-| **Table Cell Accuracy** | ≥ 90% | Cell count & content accuracy |
+| **CER** | < 8% | Character Error Rate |
+| **WER** | < 20% | Word Error Rate |
+| **Ligatures** | 100% | Accuracy for "لا", "إلا", etc. |
+| **Tables** | ≥ 90% | Cell structure preservation |
 
 ---
 
-## Testing
+## 📜 License
+Licensed under the **MIT License**. Created with passion for the Arabic script by **LogicCrafterDZ**.
 
+---
+
+# 🧶 محرك نسيج | الإصدار 2.0
+## السامي المستقبلي لمعالجة الوثائق العربية
+
+**نسيج** هو محرك من الجيل الجديد لإعادة بناء المستندات العربية. لا يكتفي البرنامج بمجرد التحويل، بل يعيد "نسج" الملفات عبر دمج تقنيات التعرف الضوئي (OCR) عالية الدقة مع فلسفة بصرية تعتز بأصالة الخط العربي.
+
+---
+
+## 🏛️ رؤية المشروع: "السامي المستقبلي"
+يتمحور "نسيج" حول فلسفة أن التقنية العربية يجب أن تتجاوز مجرد الأداء الوظيفي لتصبح قطعة فنية. نعتمد توجه **"السامي المستقبلي"** الذي يعامل الحرف العربي كمادة بصرية حية، يمزج بين منطق الخط الكوفي الأصيل والبنية الرقمية الحديثة.
+
+---
+
+## ✨ المميزات الرئيسية
+
+### 💎 دقة مؤسساتية
+- **محاكاة الحرف**: معالجة متقدمة للروابط اللغوية المعقدة (مثل: لا، إلا، الله).
+- **حفظ التشكيل**: استخدام تقنيات النورملة الموحدة (Unicode NFC) للحفاظ على الحركات (دقة >= 90%).
+- **سيادة اليمين**: فرض اتجاه الكتابة (RTL) على مستوى ملف الـ XML لضمان التوافق المطلق مع Microsoft Word.
+
+### 🧠 طبقات الذكاء
+- **استراتيجية المحركات المتعددة**: تبديل سلس بين محركات EasyOCR و PaddleOCR PP-OCRv5.
+- **نسج الجداول**: تقنيات ذكية لإعادة بناء الجداول المعقدة، المدمجة، وعديمة الحدود.
+- **الخصوصية أولاً**: تتم جميع عمليات المعالجة محلياً على جهازك دون الحاجة للإنترنت.
+
+### 🌐 واجهات هجينة
+- **بوابة المطورين (CLI)**: واجهة سطر أوامر قوية للعمليات المكثفة.
+- **الواجهة النخبوية (Web UI)**: واجهة ويب مذهلة مبنية بـ FastAPI و Tailwind CSS، تتميز بتجربة "النواة" (Nucleus) للسحب والإفلات.
+
+---
+
+## 🚀 البدء السريع
+
+### التثبيت
+
+1. **تحميل المستودع**:
+   ```bash
+   git clone https://github.com/logiccrafterdz/nassij.git
+   cd nassij
+   ```
+
+2. **تثبيت المحرك**:
+   ```bash
+   # التثبيت القياسي
+   pip install -e .
+   
+   # التثبيت مع واجهة الويب ومحركات OCR المتطورة
+   pip install -e .[web,paddle]
+   ```
+
+### تشغيل واجهة الويب
+عش تجربة "السامي المستقبلي" محلياً:
 ```bash
-# Run tests
-pytest
-
-# With coverage
-pytest --cov=core --cov=utils
+python web/app.py
+# افتح الرابط http://127.0.0.1:8000
 ```
 
-### Test Cases
-
-Create a test PDF with:
-- Arabic text with ligatures: "لا", "أسدٌ"
-- Diacritics: "فَتْحَة", "ضَمَّة"
-- Simple table with Arabic content
-- Mixed Arabic/English paragraphs
-
-Run conversion and verify:
-- Text renders correctly in Microsoft Word (RTL, connected letters)
-- Text is editable (not images)
-- Table structure is preserved
-- CER <= 8% on clean scans
-
----
-
-## Constraints
-
-- **No internet required** at runtime (offline-first)
-- **No cloud dependencies**
-- **All processing must preserve original meaning**—never "guess" broken text
-- **Unicode NFC normalization is mandatory** on all text inputs
-
----
-
-## Technical Stack
-
-| Component | Technology | Why |
-|---------|-----------|-----|
-| **PDF Parsing** | `PyMuPDF` (`fitz`) | Best coordinate-aware text extraction; handles embedded fonts |
-| **OCR Engine** | `PaddleOCR` (PP-OCRv5 + PP-TableMagic) | Only open-source engine with integrated table detection + Arabic support |
-| **Arabic Text Processing** | `python-bidi` + `arabic-reshaper` + `unicodedata` | Mandatory trio for RTL + ligatures + Unicode normalization |
-| **DOCX Generation** | `python-docx` | Full control over paragraph properties, fonts, and RTL via XML |
-| **Language Detection** | `polyglot` (fallback: `langdetect`) | Accurate per-paragraph script detection |
-
-> ❌ **Do NOT use**: Tesseract, Camelot, pdf2image alone, or any tool without explicit Arabic RTL support.
-
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## Contributing
-
-Contributions are welcome! Please ensure:
-- All Arabic text processing follows the strict order (see `arabic_processor.py`)
-- Tests pass with quality metrics within targets
-- RTL rendering is verified in Microsoft Word
-
----
-
-
-## Arabic Version / النسخة العربية
-
-**نسيج** هو أداة مفتوحة المصدر لتحويل ملفات PDF إلى DOCX مع دقة عالية للمحتوى العربي.
-
-### المميزات الرئيسية:
-- دعم كامل للنص العربي من اليمين لليسار (RTL)
-- الحفاظ على الروابط العربية (لا، إلا، الله)
-- الحفاظ على التشكيل (الفتحة، الضمة، الكسرة)
-- دعم الجداول المعقدة
-- دعم النصوص المختلطة (عربي + إنجليزي)
-
-### الاستخدام:
+### استخدام سطر الأوامر
 ```bash
-python cli.py convert input.pdf -o output.docx
+# تحويل بسيط
+nassij convert input.pdf -o output.docx
+
+# وضع الدقة العالية للمخطوطات والمسوحات الضوئية
+nassij convert input.pdf -o output.docx --mode accurate --dpi 400
 ```
 
 ---
 
-**Version**: 1.0  
-**Last Updated**: 2025
+## 📊 معايير الجودة
 
+| المعيار | الهدف | الوصف |
+|-------|--------|-------------|
+| **معدل خطأ الحرف** | < 8% | Character Error Rate |
+| **معدل خطأ الكلمة** | < 20% | Word Error Rate |
+| **دقة الروابط** | 100% | دقة معالجة "لا"، "إلا"، إلخ |
+| **دقة الجداول** | ≥ 90% | الحفاظ على بنية الخلايا والمحتوى |
+
+---
+
+## 📜 الترخيص
+المشروع مرخص تحت رخصة **MIT**. طُوّر بشغف للحرف العربي بواسطة **LogicCrafterDZ**.
