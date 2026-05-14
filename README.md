@@ -97,6 +97,8 @@ Licensed under the **MIT License**. Created with passion for the Arabic script b
 
 ---
 
+<div dir="rtl">
+
 # 🧶 محرك نسيج | الإصدار 2.0
 ## السامي المستقبلي لمعالجة الوثائق العربية
 
@@ -177,3 +179,5 @@ nassij convert input.pdf -o output.docx --mode accurate --dpi 400
 
 ## 📜 الترخيص
 المشروع مرخص تحت رخصة **MIT**. طُوّر بشغف للحرف العربي بواسطة **LogicCrafterDZ**.
+
+</div>
