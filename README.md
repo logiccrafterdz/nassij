@@ -1,12 +1,16 @@
 # 🧶 Nassij Engine V2.0
-## The Futuristic Semitic Document Weaver
+## The Advanced Arabic Document Weaver
 
 **Nassij** (Arabic for *Weaving*) is a next-generation Arabic document reconstruction engine. It doesn't just convert files; it re-weaves them. By combining high-precision OCR with culturally-rooted typography and institutional-grade layout logic, Nassij delivers the highest fidelity PDF-to-DOCX transformation available for the Arabic script.
 
 ---
 
-## 🏛️ Project Vision: "Futuristic Semitic"
-Nassij is built on the philosophy that Arabic technology shouldn't just be functional—it should be beautiful. Our **Futuristic Semitic** aesthetic treats the Arabic script as a living visual material, merging ancient calligraphic logic with modern minimalist structure.
+---
+
+## 🏛️ Project Vision
+Nassij is built on the philosophy that Arabic technology shouldn't just be functional—it should be beautiful. Our aesthetic treats the Arabic script as a living visual material, merging ancient calligraphic logic with modern minimalist structure.
+
+---
 
 ---
 
@@ -48,7 +52,7 @@ Nassij is built on the philosophy that Arabic technology shouldn't just be funct
    ```
 
 ### Running the Web Interface
-Experience the "Futuristic Semitic" UI locally:
+Experience the Nassij UI locally:
 ```bash
 python web/app.py
 # Open http://127.0.0.1:8000
@@ -100,14 +104,18 @@ Licensed under the **MIT License**. Created with passion for the Arabic script b
 <div dir="rtl">
 
 # 🧶 محرك نسيج | الإصدار 2.0
-## السامي المستقبلي لمعالجة الوثائق العربية
+## حل متطور لمعالجة الوثائق العربية
 
 **نسيج** هو محرك من الجيل الجديد لإعادة بناء المستندات العربية. لا يكتفي البرنامج بمجرد التحويل، بل يعيد "نسج" الملفات عبر دمج تقنيات التعرف الضوئي (OCR) عالية الدقة مع فلسفة بصرية تعتز بأصالة الخط العربي.
 
 ---
 
-## 🏛️ رؤية المشروع: "السامي المستقبلي"
-يتمحور "نسيج" حول فلسفة أن التقنية العربية يجب أن تتجاوز مجرد الأداء الوظيفي لتصبح قطعة فنية. نعتمد توجه **"السامي المستقبلي"** الذي يعامل الحرف العربي كمادة بصرية حية، يمزج بين منطق الخط الكوفي الأصيل والبنية الرقمية الحديثة.
+---
+
+## 🏛️ رؤية المشروع
+يتمحور "نسيج" حول فلسفة أن التقنية العربية يجب أن تتجاوز مجرد الأداء الوظيفي لتصبح قطعة فنية. نعتمد توجهاً يعامل الحرف العربي كمادة بصرية حية، يمزج بين منطق الخط الكوفي الأصيل والبنية الرقمية الحديثة.
+
+---
 
 ---
 
@@ -149,7 +157,7 @@ Licensed under the **MIT License**. Created with passion for the Arabic script b
    ```
 
 ### تشغيل واجهة الويب
-عش تجربة "السامي المستقبلي" محلياً:
+عش تجربة "نسيج" محلياً:
 ```bash
 python web/app.py
 # افتح الرابط http://127.0.0.1:8000
