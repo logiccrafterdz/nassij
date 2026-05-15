@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict
 
 from .merkle_tree import MerkleTree
@@ -42,7 +42,7 @@ class IntegrityProof:
         
         proof_data = {
             "version": "nassij-proof-v1",
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "source_file": source_filename,
             "merkle_root": root_hash,
             "blocks_count": len(self.blocks_info),
