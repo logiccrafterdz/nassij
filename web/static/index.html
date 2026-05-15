@@ -78,12 +78,8 @@
         .text-display { font-family: 'Amiri', serif; letter-spacing: -0.02em; line-height: 1.2; }
         .text-ui { font-family: 'IBM Plex Sans Arabic', sans-serif; letter-spacing: 0.01em; }
         
-        /* Header Logo Animation */
+        /* Header Animation */
         header { transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
-        header.scrolled {
-            background: rgba(8, 8, 10, 0.85); backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.1); padding: 0.75rem 2rem;
-        }
         
         .logo-svg {
             clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
@@ -638,12 +634,6 @@
 
     <!-- SCRIPTS -->
     <script>
-        // Smooth Header Transition
-        window.addEventListener('scroll', () => {
-            const header = document.getElementById('main-header');
-            if (window.scrollY > 50) header.classList.add('scrolled');
-            else header.classList.remove('scrolled');
-        });
 
         // Generative Flow Field Background (Arabic Script in Motion)
         const canvas = document.getElementById('bg-canvas');
