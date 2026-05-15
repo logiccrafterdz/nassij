@@ -222,6 +222,71 @@ class DOCXBuilder:
                     bbox = block.get('bbox', [0,0,100,0])
                     width = bbox[2] - bbox[0]
                     self.add_image(img_bytes, width_points=width)
+
+    def add_scanned_blocks(self, blocks: List[Dict]) -> None:
+        """
+        Add rich blocks extracted by NassijScanner.
+        Preserves font size, bold, italic, and color per run.
+        """
+        if not self.doc:
+            raise RuntimeError("Document not created.")
+            
+        for block in blocks:
+            # Create paragraph
+            p = self.doc.add_paragraph()
+            
+            # Determine if Arabic based on full text
+            full_text = block.get('text', '')
+            processed = self.arabic_processor.process_paragraph(full_text, logical_output=True)
+            is_arabic = processed['is_arabic']
+            
+            # Paragraph level RTL
+            if is_arabic:
+                pPr = p._element.get_or_add_pPr()
+                bidi = pPr.find(qn('w:bidi'))
+                if bidi is None:
+                    bidi = OxmlElement('w:bidi')
+                    pPr.append(bidi)
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+            else:
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+                
+            for span in block.get('spans', []):
+                span_text = span.get('text', '')
+                if not span_text.strip():
+                    continue
+                    
+                processed_span = self.arabic_processor.process_paragraph(span_text, logical_output=True)
+                run = p.add_run(processed_span['text'])
+                
+                # Apply styles
+                run.font.size = Pt(span.get('size', 11))
+                run.bold = span.get('is_bold', False)
+                run.italic = span.get('is_italic', False)
+                
+                # Color
+                color_int = span.get('color', 0)
+                r = (color_int >> 16) & 255
+                g = (color_int >> 8) & 255
+                b = color_int & 255
+                run.font.color.rgb = RGBColor(r, g, b)
+                
+                font_name = self.font_name
+                run.font.name = font_name
+                
+                if is_arabic:
+                    rPr = run._element.get_or_add_rPr()
+                    rtl = rPr.find(qn('w:rtl'))
+                    if rtl is None:
+                        rtl = OxmlElement('w:rtl')
+                        rPr.append(rtl)
+                    
+                    rFonts = OxmlElement('w:rFonts')
+                    rFonts.set(qn('w:ascii'), font_name)
+                    rFonts.set(qn('w:hAnsi'), font_name)
+                    rFonts.set(qn('w:cs'), font_name)
+                    rFonts.set(qn('w:hint'), 'cs')
+                    rPr.append(rFonts)
     
     def save(self, output_path: str) -> str:
         """

@@ -9,6 +9,7 @@ from typing import Optional, Callable
 from core.pdf_reader import PDFReader
 from core.ocr_engine import PaddleOCREngine
 from core.docx_builder import DOCXBuilder
+from core.scanner import NassijScanner
 from utils.metrics import calculate_all_metrics
 
 
@@ -50,9 +51,14 @@ def convert_pdf_to_docx(
             )
             docx_builder.create_document()
             
-            # Initialize OCR engine (only if needed)
+            # Initialize OCR engine or Scanner
             ocr_engine = None
-            if mode in ('balanced', 'accurate'):
+            scanner = None
+            
+            if mode == 'scan':
+                scanner = NassijScanner()
+                print("NassijScanner initialized (Direct Copy Mode)")
+            elif mode in ('balanced', 'accurate'):
                 try:
                     ocr_engine = PaddleOCREngine(lang='ar', use_table=True)
                     print("OCR engine initialized")
@@ -68,7 +74,20 @@ def convert_pdf_to_docx(
                 else:
                     print(f"Processing page {page_num + 1}/{page_count}...")
                 
-                # Extract text from page
+                if mode == 'scan':
+                    page = pdf_reader.doc[page_num]
+                    # Could add scan check here to fallback to OCR if page is scanned,
+                    # but for now we trust the user choice or let it fail gracefully.
+                    # Or we check text length:
+                    if len(page.get_text().strip()) < 50:
+                        print(f"  Warning: Page {page_num + 1} seems scanned. Scan mode may return empty.")
+                    
+                    blocks = scanner.scan_page(page)
+                    if blocks:
+                        docx_builder.add_scanned_blocks(blocks)
+                    continue
+                
+                # Extract text from page (legacy modes)
                 page_data = pdf_reader.extract_text_from_page(page_num)
                 
                 # Check if page is scanned OR if accurate mode forces OCR
@@ -144,9 +163,9 @@ Examples:
     convert_parser.add_argument('-o', '--output', type=str, required=True,
                                help='Output DOCX file path')
     convert_parser.add_argument('--mode', type=str, 
-                               choices=['fast', 'balanced', 'accurate'],
-                               default='balanced',
-                               help='Conversion mode (default: balanced)')
+                               choices=['scan', 'fast', 'balanced', 'accurate'],
+                               default='scan',
+                               help='Conversion mode (default: scan)')
     convert_parser.add_argument('--preserve-diacritics', action='store_true',
                                default=True,
                                help='Preserve Arabic diacritics (tashkeel)')
@@ -159,15 +178,15 @@ Examples:
     convert_parser.add_argument('--dpi', type=int, default=300,
                                help='DPI for scanned page conversion (default: 300)')
     
-    parser.add_argument('--info', action='store_true', help='Print PDF info without converting')
-    parser.add_argument('--benchmark', action='store_true', help='Run a benchmark test on the given PDF')
+    parser.add_argument('--info', type=str, metavar='FILE', help='Print PDF info without converting')
+    parser.add_argument('--benchmark', type=str, metavar='FILE', help='Run a benchmark test on the given PDF')
     
     args = parser.parse_args()
     
     if args.info:
-        print(f"Analyzing PDF: {args.input}")
+        print(f"Analyzing PDF: {args.info}")
         try:
-            with PDFReader(args.input) as pdf_reader:
+            with PDFReader(args.info) as pdf_reader:
                 pages = pdf_reader.get_page_count()
                 print(f"Total Pages: {pages}")
                 # Analyze a sample of pages to determine type
@@ -188,13 +207,17 @@ Examples:
         return
         
     if args.benchmark:
-        print(f"Running benchmark on: {args.input}")
+        print(f"Running benchmark on: {args.benchmark}")
         # Simplistic benchmark for now
         import time
         start_time = time.time()
         success = convert_pdf_to_docx(
-            args.input, args.output, args.mode, 
-            not args.no_diacritics, args.font, args.dpi
+            input_pdf=args.benchmark, 
+            output_docx="benchmark_output.docx", 
+            mode='scan', 
+            preserve_diacritics=True, 
+            font_name='Arial', 
+            dpi=300
         )
         elapsed = time.time() - start_time
         if success:
