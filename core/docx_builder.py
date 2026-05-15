@@ -232,6 +232,11 @@ class DOCXBuilder:
             raise RuntimeError("Document not created.")
             
         for block in blocks:
+            # Route table blocks to the table handler
+            if block.get('type') == 'table':
+                self.add_table(block)
+                continue
+            
             # Create paragraph
             p = self.doc.add_paragraph()
             

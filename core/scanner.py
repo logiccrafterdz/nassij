@@ -15,7 +15,35 @@ class NassijScanner:
     def scan_page(self, page: fitz.Page) -> List[Dict[str, Any]]:
         """
         Scan a single PyMuPDF page using rawdict and return structured blocks.
+        Also detects tables using PyMuPDF's built-in table finder.
         """
+        # --- Table Detection ---
+        table_bboxes = []
+        table_blocks = []
+        try:
+            tabs = page.find_tables()
+            for tab in tabs:
+                table_bboxes.append(tab.bbox)
+                cells = tab.extract()
+                table_blocks.append({
+                    "type": "table",
+                    "text": "\n".join([" | ".join([str(c) if c else "" for c in row]) for row in cells]),
+                    "cells": cells,
+                    "bbox": tab.bbox,
+                    "spans": []
+                })
+        except Exception:
+            pass  # find_tables may not be available in all PyMuPDF versions
+
+        def _is_inside_table(block_bbox):
+            """Check if a text block falls inside any detected table."""
+            for t_bbox in table_bboxes:
+                if (block_bbox[0] >= t_bbox[0] - 5 and block_bbox[1] >= t_bbox[1] - 5 and
+                    block_bbox[2] <= t_bbox[2] + 5 and block_bbox[3] <= t_bbox[3] + 5):
+                    return True
+            return False
+
+        # --- Text Block Extraction ---
         raw_data = page.get_text("rawdict")
         processed_blocks = []
 
@@ -23,14 +51,19 @@ class NassijScanner:
             # Type 0 is text (Type 1 is image)
             if block.get("type") != 0:
                 continue
+            
+            # Skip text blocks that fall inside detected tables
+            if table_bboxes and _is_inside_table(block.get("bbox", [0,0,0,0])):
+                continue
                 
             classified_block = self._process_text_block(block)
             if classified_block:
                 processed_blocks.append(classified_block)
-                
-        # Sort blocks top to bottom
-        processed_blocks.sort(key=lambda b: b["bbox"][1])
-        return processed_blocks
+        
+        # Merge text and table blocks, sort top to bottom
+        all_blocks = processed_blocks + table_blocks
+        all_blocks.sort(key=lambda b: b["bbox"][1])
+        return all_blocks
 
     def _process_text_block(self, block: Dict[str, Any]) -> Dict[str, Any]:
         """
