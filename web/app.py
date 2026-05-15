@@ -9,7 +9,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 import sys
-sys.path.append(str(Path(__file__).parent.parent))
+
+# Ensure project root is importable (handles both direct run and installed package)
+_project_root = str(Path(__file__).parent.parent)
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
+
 from cli import convert_pdf_to_docx
 
 app = FastAPI(title="Nassij API", description="PDF to DOCX Arabic Converter API")
