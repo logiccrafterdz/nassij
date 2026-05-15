@@ -92,7 +92,7 @@ async def serve_ui():
 async def convert_file(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    mode: str = Form("balanced"),
+    mode: str = Form("scan"),
     font: str = Form("Arial")
 ):
     """Upload a PDF and start conversion job"""

@@ -307,12 +307,23 @@
                 <p class="text-white/40 font-ui mt-4 max-w-2xl text-lg">ليست كل المستندات متساوية التعقيد. اختر عمق التحليل المطلوب للمستند قبل بدء عملية النسج.</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="modes-container">
-                <!-- Balanced -->
-                <div class="abstract-card active p-8 rounded-2xl stagger-item" data-mode="balanced">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="modes-container">
+                
+                <!-- Scan (NassijScanner) -->
+                <div class="abstract-card active p-8 rounded-2xl stagger-item" data-mode="scan">
                     <div class="flex justify-between items-start mb-12">
-                        <svg class="w-10 h-10 text-copper group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_10px_rgba(212,175,55,0.3)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10" opacity="0.2"/><rect x="7" y="7" width="10" height="10" transform="rotate(45 12 12)" /><rect x="7" y="7" width="10" height="10" /><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+                        <svg class="w-10 h-10 text-copper group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_10px_rgba(212,175,55,0.3)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 2L2 22h20L12 2z" /><path d="M12 8v8" /><path d="M12 20h.01" /></svg>
                         <span class="text-[10px] font-mono border border-copper/30 text-copper px-2 py-1 rounded">DEFAULT</span>
+                    </div>
+                    <h3 class="text-2xl font-display mb-4">النسخ المباشر</h3>
+                    <p class="text-sm text-white/50 leading-relaxed font-ui">فائق السرعة والدقة. يعتمد على الاستخراج المباشر للنص والخصائص البصرية للمستندات الرقمية دون المرور عبر OCR.</p>
+                </div>
+                
+                <!-- Balanced -->
+                <div class="abstract-card p-8 rounded-2xl stagger-item delay-100" data-mode="balanced">
+                    <div class="flex justify-between items-start mb-12">
+                        <svg class="w-10 h-10 text-white/30 transition-all duration-500 group-hover:text-teal group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_rgba(0,242,254,0.3)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10" opacity="0.2"/><rect x="7" y="7" width="10" height="10" transform="rotate(45 12 12)" /><rect x="7" y="7" width="10" height="10" /><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+                        <span class="text-[10px] font-mono border border-white/10 text-white/30 px-2 py-1 rounded transition-colors">HYBRID</span>
                     </div>
                     <h3 class="text-2xl font-display mb-4">الاستخراج الهجين</h3>
                     <p class="text-sm text-white/50 leading-relaxed font-ui">يجمع بذكاء بين طبقة النص الرقمي الأصلية للمستند إن وجدت، ويكمّلها بمعالجة بصرية عالية الدقة للصفحات الممسوحة.</p>
@@ -338,7 +349,7 @@
                     <p class="text-sm text-white/50 leading-relaxed font-ui">قراءة نصية فورية. مثالي للكتب والروايات حيث يهمّ النص النظيف المتدفق أكثر من الهيكل المكتبي المعقد.</p>
                 </div>
             </div>
-            <input type="hidden" id="selected-mode" value="balanced">
+            <input type="hidden" id="selected-mode" value="scan">
         </section>
 
         <!-- 4. FONT CHARACTER -->
