@@ -1,102 +1,97 @@
 """
-Basic test script to verify Nassij core functionality.
-Run this to test Arabic text processing without requiring a PDF.
+Proper pytest test suite for Nassij core functionality.
+Replaces the old print-based test_basic.py with real assertions.
 """
+import pytest
 from core.arabic_processor import ArabicProcessor
-from utils.unicode_helpers import normalize_nfc, count_diacritics
+from utils.unicode_helpers import normalize_nfc, count_diacritics, is_arabic_char
 from utils.metrics import validate_ligatures, calculate_cer
 
 
-def test_arabic_processor():
-    """Test Arabic text processing."""
-    print("Testing Arabic Processor...")
-    processor = ArabicProcessor(preserve_diacritics=True)
-    
-    # Test ligatures
-    test_cases = [
-        ("لا", "Lam + Alif ligature"),
-        ("إلا", "Alif + Lam + Alif ligature"),
-        ("الله", "Allah ligature"),
-        ("أسدٌ", "Text with diacritics"),
-        ("مرحبا بك", "Simple Arabic text"),
-        ("Hello مرحبا", "Mixed Arabic/English"),
-    ]
-    
-    print("\n1. Testing Ligatures and Text Processing:")
-    for text, description in test_cases:
-        processed = processor.process_paragraph(text)
-        print(f"   Input:  {text}")
-        print(f"   Output: {processed['text']}")
-        print(f"   Arabic: {processed['is_arabic']}")
-        print(f"   Description: {description}")
-        print()
-    
-    # Test ligature validation
-    print("2. Testing Ligature Validation:")
-    test_text = "لا يوجد إلا الله"
-    ligature_results = processor.validate_ligatures(test_text)
-    for ligature, result in ligature_results.items():
-        status = "✓" if result.get('found') and result.get('correct', False) else "✗"
-        print(f"   {status} {ligature}: {result}")
-    
-    print("\n✓ Arabic Processor tests completed!")
+class TestArabicProcessor:
+    """Tests for the Arabic text processing pipeline."""
+
+    def setup_method(self):
+        self.processor = ArabicProcessor(preserve_diacritics=True)
+
+    def test_simple_arabic_detected(self):
+        result = self.processor.process_paragraph("مرحبا بك")
+        assert result["is_arabic"] is True
+
+    def test_english_not_arabic(self):
+        result = self.processor.process_paragraph("Hello world")
+        assert result["is_arabic"] is False
+
+    def test_mixed_text_detected_as_arabic(self):
+        result = self.processor.process_paragraph("Hello مرحبا بك في النظام")
+        assert result["is_arabic"] is True
+
+    def test_diacritics_preserved(self):
+        # Use explicit Unicode: ba + kasra + sin + sukun + mim + kasra
+        text = "\u0628\u0650\u0633\u0652\u0645\u0650"
+        # Test the DOCX output path (logical order) which is where diacritics matter
+        result = self.processor.process_paragraph(text, logical_output=True)
+        assert result["diacritics_count"] > 0, "Diacritics should be preserved in logical output mode"
+
+    def test_lam_alif_ligature_preserved(self):
+        result = self.processor.process_paragraph("لا يوجد", logical_output=True)
+        assert "لا" in result["text"]
+
+    def test_allah_ligature_preserved(self):
+        result = self.processor.process_paragraph("الله أكبر", logical_output=True)
+        assert "الله" in result["text"]
+
+    def test_empty_input(self):
+        result = self.processor.process_paragraph("")
+        assert result["text"] == ""
+        assert result["is_arabic"] is False
+
+    def test_whitespace_only(self):
+        result = self.processor.process_paragraph("   ")
+        assert result["is_arabic"] is False
+
+    def test_logical_output_mode(self):
+        text = "بسم الله الرحمن الرحيم"
+        result = self.processor.process_paragraph(text, logical_output=True)
+        assert result["text"] is not None
+        assert len(result["text"]) > 0
 
 
-def test_unicode_helpers():
-    """Test Unicode helper functions."""
-    print("\nTesting Unicode Helpers...")
-    
-    # Test NFC normalization
-    text1 = "أسد"
-    text2 = normalize_nfc(text1)
-    print(f"   NFC Normalization: {text1} -> {text2}")
-    
-    # Test diacritics counting
-    text_with_diacritics = "أسدٌ"
-    count = count_diacritics(text_with_diacritics)
-    print(f"   Diacritics in '{text_with_diacritics}': {count}")
-    
-    print("\n✓ Unicode Helpers tests completed!")
+class TestUnicodeHelpers:
+    """Tests for Unicode utility functions."""
+
+    def test_nfc_normalization(self):
+        text = "أسد"
+        normalized = normalize_nfc(text)
+        assert normalized is not None
+        assert len(normalized) > 0
+
+    def test_diacritics_counting(self):
+        assert count_diacritics("أسدٌ") >= 1
+        assert count_diacritics("أسد") == 0
+
+    def test_arabic_char_detection(self):
+        assert is_arabic_char("ب") is True
+        assert is_arabic_char("A") is False
+        assert is_arabic_char("5") is False
 
 
-def test_metrics():
-    """Test quality metrics."""
-    print("\nTesting Quality Metrics...")
-    
-    # Test CER
-    reference = "مرحبا بك"
-    hypothesis = "مرحبا بك"
-    cer = calculate_cer(reference, hypothesis)
-    print(f"   CER (identical): {cer:.4f} (expected: 0.0000)")
-    
-    # Test with error
-    hypothesis_error = "مرحبا ب"
-    cer_error = calculate_cer(reference, hypothesis_error)
-    print(f"   CER (with error): {cer_error:.4f}")
-    
-    # Test ligature validation
-    test_text = "لا يوجد إلا الله"
-    ligatures = validate_ligatures(test_text)
-    print(f"   Ligatures found: {sum(1 for v in ligatures.values() if v.get('found'))}")
-    
-    print("\n✓ Metrics tests completed!")
+class TestMetrics:
+    """Tests for quality metrics."""
 
+    def test_cer_identical(self):
+        cer = calculate_cer("مرحبا بك", "مرحبا بك")
+        assert cer == 0.0
 
-if __name__ == "__main__":
-    print("=" * 60)
-    print("Nassij Basic Functionality Test")
-    print("=" * 60)
-    
-    try:
-        test_unicode_helpers()
-        test_arabic_processor()
-        test_metrics()
-        
-        print("\n" + "=" * 60)
-        print("✓ All basic tests passed!")
-        print("=" * 60)
-    except Exception as e:
-        print(f"\n✗ Test failed with error: {e}")
-        import traceback
-        traceback.print_exc()
+    def test_cer_with_error(self):
+        cer = calculate_cer("مرحبا بك", "مرحبا ب")
+        assert cer > 0.0
 
+    def test_cer_empty_reference(self):
+        cer = calculate_cer("", "")
+        assert cer == 0.0
+
+    def test_ligature_validation(self):
+        ligatures = validate_ligatures("لا يوجد إلا الله")
+        assert ligatures["لا"]["found"] is True
+        assert ligatures["الله"]["found"] is True
