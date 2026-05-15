@@ -12,6 +12,8 @@ from core.ocr_engine import OCRFacade
 from core.docx_builder import DOCXBuilder
 from core.scanner import NassijScanner
 from utils.metrics import calculate_all_metrics
+from integrity.proof import IntegrityProof
+import json
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
@@ -23,6 +25,7 @@ def convert_pdf_to_docx(
     preserve_diacritics: bool = True,
     font_name: str = 'Arial',
     dpi: int = 300,
+    generate_proof: bool = False,
     progress_callback: Optional[Callable[[int, int, str], None]] = None
 ) -> bool:
     """
@@ -57,6 +60,7 @@ def convert_pdf_to_docx(
             # Initialize OCR engine or Scanner
             ocr_engine = None
             scanner = None
+            proof = IntegrityProof() if generate_proof else None
             
             if mode == 'scan':
                 scanner = NassijScanner()
@@ -88,6 +92,9 @@ def convert_pdf_to_docx(
                     blocks = scanner.scan_page(page)
                     if blocks:
                         docx_builder.add_scanned_blocks(blocks)
+                        if proof:
+                            for b in blocks:
+                                proof.add_block(b.get('text', ''), b.get('type', 'text'))
                     continue
                 
                 # Extract text from page (legacy modes)
@@ -110,6 +117,9 @@ def convert_pdf_to_docx(
                         # Add text blocks
                         if ocr_result['text_blocks']:
                             docx_builder.add_text_blocks(ocr_result['text_blocks'])
+                            if proof:
+                                for b in ocr_result['text_blocks']:
+                                    proof.add_block(b.get('text', ''), b.get('type', 'text'))
                         
                         # Add tables
                         for table_data in ocr_result['tables']:
@@ -120,21 +130,37 @@ def convert_pdf_to_docx(
                         if page_data['text'].strip():
                              if page_data['blocks']:
                                 docx_builder.add_text_blocks(page_data['blocks'])
+                                if proof:
+                                    for b in page_data['blocks']:
+                                        proof.add_block(b.get('text', ''), b.get('type', 'text'))
                              else:
                                 docx_builder.add_mixed_paragraph(page_data['text'])
+                                if proof:
+                                    proof.add_block(page_data['text'], 'text')
                 else:
                     # Text-based page
                     if page_data['text'].strip():
                         # Add text blocks
                         if page_data['blocks']:
                             docx_builder.add_text_blocks(page_data['blocks'])
+                            if proof:
+                                for b in page_data['blocks']:
+                                    proof.add_block(b.get('text', ''), b.get('type', 'text'))
                         else:
                             # Fallback: add full text as paragraph
                             docx_builder.add_mixed_paragraph(page_data['text'])
+                            if proof:
+                                proof.add_block(page_data['text'], 'text')
             
             # Save document
             logger.info(f"Saving DOCX: {output_docx}")
             docx_builder.save(output_docx)
+            
+            if proof:
+                proof_path = output_docx + ".nassij-proof"
+                logger.info(f"Generating Linguistic Proof: {proof_path}")
+                proof.generate_proof_file(Path(input_pdf).name, proof_path)
+                
             logger.info("Conversion completed successfully!")
             return True
             
@@ -178,6 +204,14 @@ Examples:
                                help='Font name for Arabic text (default: Arial)')
     convert_parser.add_argument('--dpi', type=int, default=300,
                                help='DPI for scanned page conversion (default: 300)')
+    convert_parser.add_argument('--proof', action='store_true',
+                               help='Generate a Linguistic Merkle Tree proof file')
+    
+    # Verify command
+    verify_parser = subparsers.add_parser('verify', help='Verify Linguistic Proof')
+    verify_parser.add_argument('docx', type=str, help='Output DOCX file to verify (for context)')
+    verify_parser.add_argument('--proof', type=str, required=True,
+                               help='Path to the .nassij-proof JSON file')
     
     parser.add_argument('--info', type=str, metavar='FILE', help='Print PDF info without converting')
     parser.add_argument('--benchmark', type=str, metavar='FILE', help='Run a benchmark test on the given PDF')
@@ -230,6 +264,34 @@ Examples:
     if not args.command:
         parser.print_help()
         sys.exit(1)
+        
+    if args.command == 'verify':
+        print(f"Verifying Proof File: {args.proof}")
+        try:
+            with open(args.proof, 'r', encoding='utf-8') as f:
+                proof_data = json.load(f)
+            
+            # Recalculate root hash from leaves to verify tree integrity
+            from integrity.merkle_tree import MerkleTree
+            tree = MerkleTree()
+            for block in proof_data.get('blocks', []):
+                tree.add_leaf(block['compound_hash'])
+            calculated_root = tree.build()
+            
+            if calculated_root == proof_data.get('merkle_root'):
+                print("✅ Proof is Valid!")
+                print(f"   Root Hash: {calculated_root}")
+                print(f"   Source File: {proof_data.get('source_file')}")
+                print(f"   Blocks Count: {proof_data.get('blocks_count')}")
+                sys.exit(0)
+            else:
+                print("❌ Proof is Invalid or Corrupted!")
+                print(f"   Expected Root: {proof_data.get('merkle_root')}")
+                print(f"   Calculated:    {calculated_root}")
+                sys.exit(1)
+        except Exception as e:
+            print(f"Error reading proof file: {e}")
+            sys.exit(1)
     
     if args.command == 'convert':
         # Validate input file
@@ -251,7 +313,8 @@ Examples:
             mode=args.mode,
             preserve_diacritics=args.preserve_diacritics,
             font_name=args.font,
-            dpi=args.dpi
+            dpi=args.dpi,
+            generate_proof=args.proof
         )
         
         sys.exit(0 if success else 1)
