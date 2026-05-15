@@ -6,12 +6,15 @@ import sys
 from pathlib import Path
 from typing import Optional, Callable
 
+import logging
 from core.pdf_reader import PDFReader
-from core.ocr_engine import PaddleOCREngine
+from core.ocr_engine import OCRFacade
 from core.docx_builder import DOCXBuilder
 from core.scanner import NassijScanner
 from utils.metrics import calculate_all_metrics
 
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
 
 def convert_pdf_to_docx(
     input_pdf: str,
@@ -37,12 +40,12 @@ def convert_pdf_to_docx(
         True if conversion successful, False otherwise
     """
     try:
-        print(f"Reading PDF: {input_pdf}")
+        logger.info(f"Reading PDF: {input_pdf}")
         
         # Initialize PDF reader
         with PDFReader(input_pdf) as pdf_reader:
             page_count = pdf_reader.get_page_count()
-            print(f"Found {page_count} page(s)")
+            logger.info(f"Found {page_count} page(s)")
             
             # Initialize DOCX builder
             docx_builder = DOCXBuilder(
@@ -57,14 +60,14 @@ def convert_pdf_to_docx(
             
             if mode == 'scan':
                 scanner = NassijScanner()
-                print("NassijScanner initialized (Direct Copy Mode)")
+                logger.info("NassijScanner initialized (Direct Copy Mode)")
             elif mode in ('balanced', 'accurate'):
                 try:
-                    ocr_engine = PaddleOCREngine(lang='ar', use_table=True)
-                    print("OCR engine initialized")
+                    ocr_engine = OCRFacade(lang='ar', use_table=True)
+                    logger.info("OCR engine initialized")
                 except Exception as e:
-                    print(f"Warning: OCR engine initialization failed: {e}")
-                    print("Falling back to text extraction only")
+                    logger.warning(f"OCR engine initialization failed: {e}")
+                    logger.warning("Falling back to text extraction only")
                     mode = 'fast'
             
             # Process each page
@@ -72,7 +75,7 @@ def convert_pdf_to_docx(
                 if progress_callback:
                     progress_callback(page_num + 1, page_count, "extracting")
                 else:
-                    print(f"Processing page {page_num + 1}/{page_count}...")
+                    logger.info(f"Processing page {page_num + 1}/{page_count}...")
                 
                 if mode == 'scan':
                     page = pdf_reader.doc[page_num]
@@ -80,7 +83,7 @@ def convert_pdf_to_docx(
                     # but for now we trust the user choice or let it fail gracefully.
                     # Or we check text length:
                     if len(page.get_text().strip()) < 50:
-                        print(f"  Warning: Page {page_num + 1} seems scanned. Scan mode may return empty.")
+                        logger.warning(f"  Page {page_num + 1} seems scanned. Scan mode may return empty.")
                     
                     blocks = scanner.scan_page(page)
                     if blocks:
@@ -97,7 +100,7 @@ def convert_pdf_to_docx(
                 if should_use_ocr:
                     if ocr_engine:
                         reason = "scanned page" if page_data['is_scanned'] else "accurate mode forced"
-                        print(f"  Page {page_num + 1} processing using OCR ({reason})...")
+                        logger.info(f"  Page {page_num + 1} processing using OCR ({reason})...")
                         # Convert page to image
                         page_image = pdf_reader.convert_page_to_image(page_num, dpi=dpi)
                         
@@ -112,7 +115,7 @@ def convert_pdf_to_docx(
                         for table_data in ocr_result['tables']:
                             docx_builder.add_table(table_data)
                     else:
-                        print(f"  Warning: OCR requested but engine unavailable. Falling back to text.")
+                        logger.warning(f"  OCR requested but engine unavailable. Falling back to text.")
                         # Text-based fallback
                         if page_data['text'].strip():
                              if page_data['blocks']:
@@ -130,15 +133,13 @@ def convert_pdf_to_docx(
                             docx_builder.add_mixed_paragraph(page_data['text'])
             
             # Save document
-            print(f"Saving DOCX: {output_docx}")
+            logger.info(f"Saving DOCX: {output_docx}")
             docx_builder.save(output_docx)
-            print("Conversion completed successfully!")
+            logger.info("Conversion completed successfully!")
             return True
             
     except Exception as e:
-        print(f"Error during conversion: {e}", file=sys.stderr)
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Error during conversion: {e}", exc_info=True)
         return False
 
 

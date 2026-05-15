@@ -1,5 +1,8 @@
 from typing import List, Dict, Any, Tuple
 import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
 
 class LayoutProcessor:
     """
@@ -28,7 +31,7 @@ class LayoutProcessor:
             
         # 1. Global Direction Detection
         self.direction = self._detect_global_direction(blocks)
-        print(f"  [LayoutProcessor] Global Direction Detected: {self.direction}")
+        logger.info(f"Global Direction Detected: {self.direction}")
             
         # 1. Group by lines
         lines = self._group_by_lines(blocks)
@@ -170,7 +173,7 @@ class LayoutProcessor:
                 
                 # If we have multiple rows OR one row with VERY large gaps, it's a table
                 if len(table_rows) >= 2 or avg_gap > 50:
-                    print(f"  [LayoutProcessor] Detected Table with {len(table_rows)} rows. Avg Gap: {avg_gap:.1f}")
+                    logger.info(f"Detected Table with {len(table_rows)} rows. Avg Gap: {avg_gap:.1f}")
                     processed_regions.append(self._reconstruct_table_object(table_rows))
                     i = j
                     continue

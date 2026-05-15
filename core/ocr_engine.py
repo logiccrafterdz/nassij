@@ -18,27 +18,29 @@ except ImportError:
         PrimaryEngine = None
         ENGINE_NAME = "None"
 
-class PaddleOCREngine: # Keeping name for compatibility, or alias it
+import logging
+
+logger = logging.getLogger(__name__)
+
+class OCRFacade:
     """
-    Wrapper for OCR Engine.
-    Currently delegates to: EasyOCR or PaddleOCR check logs.
+    Facade for OCR Engine.
+    Currently delegates to: EasyOCR or PaddleOCR.
     """
     def __init__(self, lang: str = 'ar', use_table: bool = True):
         self.engine = None
         if PrimaryEngine:
-            print(f"Initializing Primary OCR Engine: {ENGINE_NAME}")
-            # EasyOCR doesn't use 'use_table' in constructor logic same way, but we pass what we can
-            # Our wrappers match args loosely or we adapt
+            logger.info(f"Initializing Primary OCR Engine: {ENGINE_NAME}")
             if ENGINE_NAME == "EasyOCR":
                 self.engine = PrimaryEngine(lang=lang)
             else:
                 self.engine = PrimaryEngine(lang=lang, use_table=use_table)
             
             if not self.engine.initialize():
-                print(f"Failed to initialize {ENGINE_NAME}")
+                logger.error(f"Failed to initialize {ENGINE_NAME}")
                 self.engine = None
         else:
-            print("Warning: No capable OCR Engine found (EasyOCR or PaddleOCR).")
+            logger.warning("No capable OCR Engine found (EasyOCR or PaddleOCR).")
 
     def extract_from_pil_image(self, image: Image.Image) -> Dict:
         if not self.engine:

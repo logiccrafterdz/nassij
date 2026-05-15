@@ -12,6 +12,9 @@ import unicodedata
 from typing import Optional
 from bidi.algorithm import get_display
 import arabic_reshaper
+import logging
+
+logger = logging.getLogger(__name__)
 
 from utils.unicode_helpers import normalize_nfc, count_diacritics, is_arabic_char
 
@@ -85,7 +88,7 @@ class ArabicProcessor:
             except Exception as e:
                 # If reshaping fails, continue with bidi-corrected text
                 # Never corrupt meaning for speed
-                print(f"Warning: Arabic reshaping failed: {e}")
+                logger.warning(f"Arabic reshaping failed: {e}")
         
         # Step 4: Final NFC normalization pass (after reshaping)
         text = normalize_nfc(text)

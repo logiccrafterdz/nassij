@@ -1,7 +1,9 @@
 from typing import Dict, Any, List
 import numpy as np
-from PIL import Image
 import logging
+
+logger = logging.getLogger(__name__)
+from PIL import Image
 
 from core.engines.base_engine import OCREngine
 from core.image_preprocessor import ImagePreprocessor
@@ -23,18 +25,17 @@ class EasyOCREngine(OCREngine):
         """Initialize EasyOCR Reader."""
         try:
             import easyocr
-            # Initialize reader with Arabic and English
-            # EasyOCR downloads model on first run
-            print("Initializing EasyOCR model (this may take a moment)...")
-            self.reader = easyocr.Reader(['ar', 'en'], gpu=self.use_gpu)
+            # Disable noisy logs from easyocr itself if possible, but initialize
+            logger.info("Initializing EasyOCR model (this may take a moment)...")
+            self.reader = easyocr.Reader([self.lang], gpu=False) # Fallback to CPU for broad compat
             self.is_ready = True
-            print("EasyOCR initialized successfully.")
+            logger.info("EasyOCR initialized successfully.")
             return True
         except ImportError:
-            print("Error: easyocr not installed.")
+            logger.error("Error: easyocr not installed.")
             return False
         except Exception as e:
-            print(f"Error initializing EasyOCR: {e}")
+            logger.error(f"Error initializing EasyOCR: {e}")
             return False
 
     def extract_text(self, image_input: Any) -> str:

@@ -3,6 +3,8 @@ import logging
 import numpy as np
 from PIL import Image
 
+logger = logging.getLogger(__name__)
+
 from core.engines.base_engine import OCREngine
 from core.image_preprocessor import ImagePreprocessor
 
@@ -24,6 +26,11 @@ class PaddleOCREngine(OCREngine):
         """Initialize PaddleOCR models."""
         try:
             from paddleocr import PaddleOCR, PPStructure
+            # disable noisy paddle logs
+            import logging as pd_logging
+            pd_logging.getLogger('ppocr').setLevel(pd_logging.ERROR)
+            
+            logger.info("Initializing PaddleOCR model...")
             
             # Text + Layout OCR
             # disable_angle_cls=True might improve speed if pages are upright
@@ -34,13 +41,13 @@ class PaddleOCREngine(OCREngine):
                 self.structure_engine = PPStructure(show_log=False, image_orientation=True)
                 
             self.is_ready = True
-            print("PaddleOCR initialized successfully.")
+            logger.info("PaddleOCR initialized successfully.")
             return True
         except ImportError:
-            print("Error: PaddleOCR not installed. Please install with: pip install paddlepaddle paddleocr")
+            logger.error("Error: PaddleOCR not installed. Please install with: pip install paddlepaddle paddleocr")
             return False
         except Exception as e:
-            print(f"Error initializing PaddleOCR: {e}")
+            logger.error(f"Error initializing PaddleOCR: {e}")
             return False
 
     def extract_text(self, image_input: Any) -> str:
