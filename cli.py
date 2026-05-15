@@ -83,11 +83,26 @@ def convert_pdf_to_docx(
                 
                 if mode == 'scan':
                     page = pdf_reader.doc[page_num]
-                    # Could add scan check here to fallback to OCR if page is scanned,
-                    # but for now we trust the user choice or let it fail gracefully.
-                    # Or we check text length:
-                    if len(page.get_text().strip()) < 50:
-                        logger.warning(f"  Page {page_num + 1} seems scanned. Scan mode may return empty.")
+                    page_text = page.get_text().strip()
+                    
+                    if len(page_text) < 50:
+                        # Auto-fallback: this page is scanned, try OCR if available
+                        logger.warning(f"  Page {page_num + 1} appears scanned. Falling back to OCR...")
+                        if ocr_engine is None:
+                            try:
+                                ocr_engine = OCRFacade(lang='ar', use_table=True)
+                            except Exception:
+                                logger.warning(f"  OCR engine unavailable. Skipping scanned page {page_num + 1}.")
+                                continue
+                        if ocr_engine and ocr_engine.engine:
+                            page_image = pdf_reader.convert_page_to_image(page_num, dpi=dpi)
+                            ocr_result = ocr_engine.extract_from_pil_image(page_image)
+                            if ocr_result['text_blocks']:
+                                docx_builder.add_text_blocks(ocr_result['text_blocks'])
+                                if proof:
+                                    for b in ocr_result['text_blocks']:
+                                        proof.add_block(b.get('text', ''), b.get('type', 'text'))
+                        continue
                     
                     blocks = scanner.scan_page(page)
                     if blocks:
