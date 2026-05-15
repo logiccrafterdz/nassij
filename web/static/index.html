@@ -244,8 +244,12 @@
                             <p id="drop-desc" class="text-white/40 text-sm font-ui tracking-wider uppercase">اسحب المستند إلى هنا أو انقر للاستدعاء</p>
                             <input type="file" id="fileInput" class="hidden" accept=".pdf">
                         </div>
-                        <div class="flex justify-center w-full mt-8 opacity-0 transform translate-y-4 transition-all duration-500" id="action-area">
-                            <button id="convert-btn" class="btn-primary py-4 px-12 rounded-full font-ui font-semibold text-lg flex items-center gap-4">
+                        <div class="flex flex-col items-center w-full mt-8 opacity-0 transform translate-y-4 transition-all duration-500" id="action-area">
+                            <label class="flex items-center gap-3 mb-6 justify-center text-white/60 text-sm font-ui cursor-pointer hover:text-copper transition-colors">
+                                <input type="checkbox" id="generate-proof-chk" class="w-5 h-5 rounded border-white/20 bg-ink text-copper focus:ring-copper focus:ring-offset-ink accent-copper">
+                                توليد ملف الإثبات اللغوي الميركالي (Linguistic Proof)
+                            </label>
+                            <button id="convert-btn" class="btn-primary py-4 px-12 rounded-full font-ui font-semibold text-lg flex items-center justify-center gap-4 w-auto">
                                 بدء التفكيك وإعادة النسج <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 12H4m0 0l6-6m-6 6l6 6" /><path d="M16 6s-4 6 4 12" stroke-width="0.8" opacity="0.4"/></svg>
                             </button>
                         </div>
@@ -285,10 +289,13 @@
                         <h2 class="text-3xl font-display text-white mb-3">اكتملت البنية</h2>
                         <p class="text-white/40 mb-12 font-ui text-center max-w-sm">تم نسج المستند بنجاح وهو الآن جاهز بصيغته الرقمية القابلة للتحرير.</p>
                         
-                        <div class="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                        <div class="flex flex-col sm:flex-row gap-4 w-full justify-center mt-6">
                             <button id="reset-btn" class="btn-mythic py-3 px-8 rounded-full text-sm font-ui">
                                 استدعاء مستند آخر
                             </button>
+                            <a id="download-proof-btn" href="#" class="btn-mythic hidden py-3 px-8 rounded-full font-ui text-teal border-teal/40 hover:border-teal flex items-center justify-center gap-2">
+                                تحميل ملف الإثبات 🌳
+                            </a>
                             <a id="download-btn" href="#" class="btn-primary py-3 px-8 rounded-full font-ui flex items-center justify-center gap-3">
                                 استلام المخرجات <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="square" stroke-linejoin="miter"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
                             </a>
@@ -869,6 +876,7 @@
             formData.append('file', selectedFile);
             formData.append('mode', modeInput.value);
             formData.append('font', fontInput.value);
+            formData.append('generate_proof', document.getElementById('generate-proof-chk').checked);
 
             // Hide Upload, Show Processing
             viewUpload.classList.add('hidden');
@@ -920,6 +928,13 @@
                         viewProcessing.classList.add('hidden'); viewProcessing.classList.remove('flex');
                         viewSuccess.classList.remove('hidden'); viewSuccess.classList.add('flex');
                         document.getElementById('download-btn').href = data.download_url;
+                        const proofBtn = document.getElementById('download-proof-btn');
+                        if (data.proof_url) {
+                            proofBtn.href = data.proof_url;
+                            proofBtn.classList.remove('hidden');
+                        } else {
+                            proofBtn.classList.add('hidden');
+                        }
                     }, 1000);
                 }
                 else if (data.status === 'failed') {

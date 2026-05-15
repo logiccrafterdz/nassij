@@ -37,7 +37,7 @@ conversion_status = {}
 def get_job_id():
     return str(int(time.time() * 1000))
 
-def run_conversion(job_id: str, input_path: str, output_path: str, mode: str, font: str):
+def run_conversion(job_id: str, input_path: str, output_path: str, mode: str, font: str, generate_proof: bool = False):
     try:
         def progress_cb(current, total, phase):
             conversion_status[job_id] = {
@@ -59,16 +59,21 @@ def run_conversion(job_id: str, input_path: str, output_path: str, mode: str, fo
             preserve_diacritics=True,
             font_name=font,
             dpi=300,
+            generate_proof=generate_proof,
             progress_callback=progress_cb
         )
         
         if success:
-            conversion_status[job_id] = {
+            response_data = {
                 "status": "completed",
                 "progress": 100,
                 "message": "Conversion successful!",
                 "download_url": f"/download/{job_id}"
             }
+            if generate_proof:
+                response_data["proof_url"] = f"/download_proof/{job_id}"
+            
+            conversion_status[job_id] = response_data
         else:
             conversion_status[job_id] = {
                 "status": "failed",
@@ -93,7 +98,8 @@ async def convert_file(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     mode: str = Form("scan"),
-    font: str = Form("Arial")
+    font: str = Form("Arial"),
+    generate_proof: bool = Form(False)
 ):
     """Upload a PDF and start conversion job"""
     if not file.filename.lower().endswith('.pdf'):
@@ -107,7 +113,7 @@ async def convert_file(
         shutil.copyfileobj(file.file, buffer)
         
     # Start the conversion in the background
-    background_tasks.add_task(run_conversion, job_id, input_path, output_path, mode, font)
+    background_tasks.add_task(run_conversion, job_id, input_path, output_path, mode, font, generate_proof)
     
     conversion_status[job_id] = {
         "status": "queued",
@@ -136,6 +142,19 @@ async def download_file(job_id: str):
         path=output_path,
         filename="nassij_converted.docx",
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+
+@app.get("/download_proof/{job_id}")
+async def download_proof_file(job_id: str):
+    """Download the generated .nassij-proof file"""
+    proof_path = TEMP_DIR / f"{job_id}_output.docx.nassij-proof"
+    if not proof_path.exists():
+        return JSONResponse(status_code=404, content={"detail": "Proof file not found or expired"})
+        
+    return FileResponse(
+        path=proof_path,
+        filename="nassij_converted.nassij-proof",
+        media_type="application/json"
     )
 
 if __name__ == "__main__":
