@@ -1,4 +1,4 @@
-# 🧶 Nassij Engine V2.0
+# 🧶 Nassij Engine V3.0
 ## The Advanced Arabic Document Weaver
 
 **Nassij** (Arabic for *Weaving*) is a next-generation Arabic document reconstruction engine. It doesn't just convert files; it re-weaves them. By combining high-precision OCR with culturally-rooted typography and institutional-grade layout logic, Nassij delivers the highest fidelity PDF-to-DOCX transformation available for the Arabic script.
@@ -16,7 +16,13 @@ Nassij is built on the philosophy that Arabic technology shouldn't just be funct
 
 ## ✨ Key Features
 
+### 🛡️ Linguistic Merkle Trees (Integrity Layer)
+- **Cryptographic Verification**: Generates `.nassij-proof` JSON files leveraging Merkle trees to seal document contents.
+- **Canonical Arabic Hashing**: Normalizes Arabic diacritics, presentation forms, and removes Kashida before hashing, ensuring equivalent strings share the same cryptographic identity.
+- **Trust & Verification**: Verify that a generated DOCX wasn't tampered with post-conversion.
+
 ### 💎 Precision Reconstruction
+- **Direct Copy Mode (NassijScanner)**: Extremely fast, 100% accurate extraction for digital native PDFs, bypassing OCR and extracting coordinate-perfect layouts.
 - **Institutional-Grade Fidelity**: Specialized handling for complex Arabic ligatures (e.g., "لا", "الله", "إلا").
 - **Diacritics Preservation**: Advanced regex and Unicode normalization to preserve tashkeel (>=90% accuracy).
 - **RTL Sovereignty**: Native Right-to-Left (RTL) enforcement at the XML level for Microsoft Word.
@@ -63,6 +69,12 @@ python web/app.py
 # Basic conversion
 nassij convert input.pdf -o output.docx
 
+# Generate a Cryptographic Proof
+nassij convert input.pdf -o output.docx --proof
+
+# Verify a generated Proof
+nassij verify output.docx --proof output.docx.nassij-proof
+
 # High-accuracy mode for scanned manuscripts
 nassij convert input.pdf -o output.docx --mode accurate --dpi 400
 ```
@@ -103,8 +115,8 @@ Licensed under the **MIT License**. Created with passion for the Arabic script b
 
 <div dir="rtl">
 
-# 🧶 محرك نسيج | الإصدار 2.0
-## حل متطور لمعالجة الوثائق العربية
+# 🧶 محرك نسيج | الإصدار 3.0
+## حل متطور لمعالجة الوثائق العربية والتوثيق المشفّر
 
 **نسيج** هو محرك من الجيل الجديد لإعادة بناء المستندات العربية. لا يكتفي البرنامج بمجرد التحويل، بل يعيد "نسج" الملفات عبر دمج تقنيات التعرف الضوئي (OCR) عالية الدقة مع فلسفة بصرية تعتز بأصالة الخط العربي.
 
@@ -121,7 +133,13 @@ Licensed under the **MIT License**. Created with passion for the Arabic script b
 
 ## ✨ المميزات الرئيسية
 
+### 🛡️ الأشجار الميركالية اللغوية (طبقة التوثيق)
+- **الإثبات الرياضي**: توليد ملفات `.nassij-proof` تعتمد على خوارزميات Merkle Trees لختم محتوى المستند.
+- **التطبيع اللغوي (Canonical Hashing)**: توحيد البصمة البايتية للنصوص عبر تجاهل الكشيدة، فصل التشكيل، وفك الـ Presentation Forms، بحيث يكون للنصوص المتكافئة نفس الهاش.
+- **التحقق من النزاهة**: فحص الوثائق رقمياً لضمان عدم تعرضها للتلاعب أو التحريف بعد تحويلها.
+
 ### 💎 دقة مؤسساتية
+- **الاستخراج المباشر (NassijScanner)**: سرعة فائقة ودقة 100% للمستندات الرقمية الحديثة (Digital Native) مع تجاوز الـ OCR بالكامل وبناء الهيكل مكانياً.
 - **محاكاة الحرف**: معالجة متقدمة للروابط اللغوية المعقدة (مثل: لا، إلا، الله).
 - **حفظ التشكيل**: استخدام تقنيات النورملة الموحدة (Unicode NFC) للحفاظ على الحركات (دقة >= 90%).
 - **سيادة اليمين**: فرض اتجاه الكتابة (RTL) على مستوى ملف الـ XML لضمان التوافق المطلق مع Microsoft Word.
@@ -167,6 +185,12 @@ python web/app.py
 ```bash
 # تحويل بسيط
 nassij convert input.pdf -o output.docx
+
+# تحويل مع توليد ملف إثبات التوثيق اللغوي
+nassij convert input.pdf -o output.docx --proof
+
+# التحقق من سلامة مستند تم تحويله سابقاً
+nassij verify output.docx --proof output.docx.nassij-proof
 
 # وضع الدقة العالية للمخطوطات والمسوحات الضوئية
 nassij convert input.pdf -o output.docx --mode accurate --dpi 400
