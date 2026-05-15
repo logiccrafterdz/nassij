@@ -48,6 +48,7 @@ generate_test_pdf.py
 *.png
 *.jpg
 *.jpeg
+*.nassij-proof
 temp/
 tmp/
 *.log
