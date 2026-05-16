@@ -251,8 +251,9 @@ class DOCXBuilder:
                 bidi = pPr.find(qn('w:bidi'))
                 if bidi is None:
                     bidi = OxmlElement('w:bidi')
+                    bidi.set(qn('w:val'), '1')
                     pPr.append(bidi)
-                p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
             else:
                 p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
                 
@@ -284,7 +285,15 @@ class DOCXBuilder:
                     rtl = rPr.find(qn('w:rtl'))
                     if rtl is None:
                         rtl = OxmlElement('w:rtl')
+                        rtl.set(qn('w:val'), '1')
                         rPr.append(rtl)
+                        
+                    lang = rPr.find(qn('w:lang'))
+                    if lang is None:
+                        lang = OxmlElement('w:lang')
+                        lang.set(qn('w:val'), 'ar-SA')
+                        lang.set(qn('w:bidi'), 'ar-SA')
+                        rPr.append(lang)
                     
                     rFonts = OxmlElement('w:rFonts')
                     rFonts.set(qn('w:ascii'), font_name)
