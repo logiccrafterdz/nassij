@@ -5,6 +5,7 @@ import argparse
 import sys
 from pathlib import Path
 from typing import Optional, Callable
+import time
 
 import logging
 from core.pdf_reader import PDFReader
@@ -358,7 +359,18 @@ Examples:
         if output_dir and not output_dir.exists():
             output_dir.mkdir(parents=True, exist_ok=True)
         
+        def cli_progress(current, total, phase):
+            percent = int((current / total) * 100) if total > 0 else 100
+            bar_len = 40
+            filled = int(bar_len * current / total) if total > 0 else bar_len
+            bar = '█' * filled + '-' * (bar_len - filled)
+            sys.stdout.write(f'\r\033[K[{bar}] {current}/{total} {phase} ({percent}%)')
+            sys.stdout.flush()
+            if current == total:
+                print()
+
         # Perform conversion
+        start_time = time.time()
         success = convert_pdf_to_docx(
             input_pdf=str(input_path),
             output_docx=str(output_path),
@@ -366,8 +378,20 @@ Examples:
             preserve_diacritics=args.preserve_diacritics,
             font_name=args.font,
             dpi=args.dpi,
-            generate_proof=args.proof
+            generate_proof=args.proof,
+            progress_callback=cli_progress
         )
+        elapsed = time.time() - start_time
+        
+        if success:
+            print("\n" + "="*40)
+            print("         Conversion Quality Card")
+            print("="*40)
+            print(f" Mode:       {args.mode}")
+            print(f" Time:       {elapsed:.2f}s")
+            print(f" Diacritics: {'Preserved' if args.preserve_diacritics else 'Removed'}")
+            print(f" Proof:      {'Generated' if args.proof else 'Skipped'}")
+            print("="*40)
         
         sys.exit(0 if success else 1)
 
