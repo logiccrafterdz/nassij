@@ -6,17 +6,21 @@ from typing import Any, Dict, Optional
 from PIL import Image
 
 # Import specific implementation 
-# Priority: EasyOCR (Python 3.14 compatible), then PaddleOCR
+# Priority: SuryaOCR (Best for Arabic layout), then EasyOCR, then PaddleOCR
 try:
-    from core.engines.easyocr_engine import EasyOCREngine as PrimaryEngine
-    ENGINE_NAME = "EasyOCR"
+    from core.engines.surya_engine import SuryaOCREngine as PrimaryEngine
+    ENGINE_NAME = "SuryaOCR"
 except ImportError:
     try:
-        from core.engines.paddle_engine import PaddleOCREngine as PrimaryEngine
-        ENGINE_NAME = "PaddleOCR"
+        from core.engines.easyocr_engine import EasyOCREngine as PrimaryEngine
+        ENGINE_NAME = "EasyOCR"
     except ImportError:
-        PrimaryEngine = None
-        ENGINE_NAME = "None"
+        try:
+            from core.engines.paddle_engine import PaddleOCREngine as PrimaryEngine
+            ENGINE_NAME = "PaddleOCR"
+        except ImportError:
+            PrimaryEngine = None
+            ENGINE_NAME = "None"
 
 import logging
 
