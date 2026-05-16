@@ -228,6 +228,19 @@ Examples:
     verify_parser.add_argument('docx', type=str, help='Output DOCX file to verify (for context)')
     verify_parser.add_argument('--proof', type=str, required=True,
                                help='Path to the .nassij-proof JSON file')
+                               
+    # Batch command
+    batch_parser = subparsers.add_parser('batch', help='Batch convert multiple PDFs')
+    batch_parser.add_argument('input_dir', type=str, help='Input directory containing PDF files')
+    batch_parser.add_argument('-o', '--output_dir', type=str, required=True,
+                               help='Output directory for DOCX files')
+    batch_parser.add_argument('--mode', type=str, 
+                               choices=['scan', 'fast', 'balanced', 'accurate', 'legal', 'research'],
+                               default='scan')
+    batch_parser.add_argument('--workers', type=int, default=4,
+                               help='Number of parallel workers (default: 4)')
+    batch_parser.add_argument('--proof', action='store_true',
+                               help='Generate Linguistic Merkle Tree proof files')
     
     parser.add_argument('--info', type=str, metavar='FILE', help='Print PDF info without converting')
     parser.add_argument('--benchmark', type=str, metavar='FILE', help='Run a benchmark test on the given PDF')
@@ -395,7 +408,55 @@ Examples:
         
         sys.exit(0 if success else 1)
 
-
+    if args.command == 'batch':
+        input_dir = Path(args.input_dir)
+        output_dir = Path(args.output_dir)
+        
+        if not input_dir.exists() or not input_dir.is_dir():
+            print(f"Error: Input directory not found: {args.input_dir}", file=sys.stderr)
+            sys.exit(1)
+            
+        output_dir.mkdir(parents=True, exist_ok=True)
+        pdf_files = list(input_dir.glob("*.pdf"))
+        
+        if not pdf_files:
+            print(f"No PDF files found in {args.input_dir}")
+            sys.exit(0)
+            
+        print(f"Found {len(pdf_files)} PDF files. Starting batch processing with {args.workers} workers...")
+        
+        import concurrent.futures
+        
+        def process_single(pdf_path):
+            out_path = output_dir / (pdf_path.stem + ".docx")
+            try:
+                # Basic progress not shown per file in batch mode to avoid terminal spam
+                success = convert_pdf_to_docx(
+                    input_pdf=str(pdf_path),
+                    output_docx=str(out_path),
+                    mode=args.mode,
+                    generate_proof=args.proof
+                )
+                return pdf_path.name, success
+            except Exception as e:
+                logger.error(f"Failed to process {pdf_path.name}: {e}")
+                return pdf_path.name, False
+                
+        start_time = time.time()
+        success_count = 0
+        
+        with concurrent.futures.ProcessPoolExecutor(max_workers=args.workers) as executor:
+            futures = [executor.submit(process_single, pdf) for pdf in pdf_files]
+            for future in concurrent.futures.as_completed(futures):
+                name, success = future.result()
+                status = "✅" if success else "❌"
+                print(f"[{status}] {name}")
+                if success: success_count += 1
+                
+        elapsed = time.time() - start_time
+        print(f"\nBatch processing completed in {elapsed:.2f}s")
+        print(f"Successful: {success_count}/{len(pdf_files)}")
+        sys.exit(0 if success_count == len(pdf_files) else 1)
 if __name__ == '__main__':
     main()
 
