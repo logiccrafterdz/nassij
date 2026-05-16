@@ -33,8 +33,18 @@ static_dir = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Temporary upload and download directories
-TEMP_DIR = Path("temp")
+TEMP_DIR = Path(__file__).parent / "temp"
 TEMP_DIR.mkdir(exist_ok=True)
+
+@app.on_event("startup")
+async def cleanup_old_files():
+    """Clean up temp files older than 1 hour on startup"""
+    for f in TEMP_DIR.glob("*"):
+        if f.is_file() and f.stat().st_mtime < time.time() - 3600:
+            try:
+                f.unlink()
+            except Exception as e:
+                print(f"Failed to delete {f}: {e}")
 
 # In-memory status store
 conversion_status = {}
@@ -109,6 +119,13 @@ async def convert_file(
     """Upload a PDF and start conversion job"""
     if not file.filename.lower().endswith('.pdf'):
         return JSONResponse(status_code=400, content={"detail": "Only PDF files are supported."})
+        
+    MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+    file.file.seek(0, 2)
+    size = file.file.tell()
+    file.file.seek(0)
+    if size > MAX_FILE_SIZE:
+        return JSONResponse(status_code=413, content={"detail": f"File too large (max {MAX_FILE_SIZE//(1024*1024)}MB)."})
         
     job_id = get_job_id()
     input_path = TEMP_DIR / f"{job_id}_input.pdf"
