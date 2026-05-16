@@ -51,6 +51,13 @@ def convert_pdf_to_docx(
             page_count = pdf_reader.get_page_count()
             logger.info(f"Found {page_count} page(s)")
             
+            # Enforce mode settings
+            if mode in ['legal', 'research']:
+                generate_proof = True
+                preserve_diacritics = True
+                if mode == 'legal':
+                    dpi = max(dpi, 400)  # Force higher DPI for legal OCR
+                    
             # Initialize DOCX builder
             docx_builder = DOCXBuilder(
                 font_name=font_name,
@@ -63,10 +70,10 @@ def convert_pdf_to_docx(
             scanner = None
             proof = IntegrityProof() if generate_proof else None
             
-            if mode == 'scan':
+            if mode in ('scan', 'research'):
                 scanner = NassijScanner()
-                logger.info("NassijScanner initialized (Direct Copy Mode)")
-            elif mode in ('balanced', 'accurate'):
+                logger.info(f"NassijScanner initialized (Mode: {mode})")
+            elif mode in ('balanced', 'accurate', 'legal'):
                 try:
                     ocr_engine = OCRFacade(lang='ar', use_table=True)
                     logger.info("OCR engine initialized")
@@ -117,8 +124,8 @@ def convert_pdf_to_docx(
                 page_data = pdf_reader.extract_text_from_page(page_num)
                 
                 # Check if page is scanned OR if accurate mode forces OCR
-                # Accurate mode forces OCR to bypass potentially corrupted/visual PDF text extraction
-                should_use_ocr = (mode == 'accurate') or (page_data['is_scanned'] and mode != 'fast')
+                # Accurate/Legal mode forces OCR to bypass potentially corrupted/visual PDF text extraction
+                should_use_ocr = (mode in ['accurate', 'legal']) or (page_data['is_scanned'] and mode not in ['fast', 'scan', 'research'])
                 
                 if should_use_ocr:
                     if ocr_engine:
@@ -206,7 +213,7 @@ Examples:
     convert_parser.add_argument('-o', '--output', type=str, required=True,
                                help='Output DOCX file path')
     convert_parser.add_argument('--mode', type=str, 
-                               choices=['scan', 'fast', 'balanced', 'accurate'],
+                               choices=['scan', 'fast', 'balanced', 'accurate', 'legal', 'research'],
                                default='scan',
                                help='Conversion mode (default: scan)')
     convert_parser.add_argument('--preserve-diacritics', action='store_true',
