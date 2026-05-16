@@ -23,9 +23,11 @@ class IntegrityProof:
         if block_type == "image":
             return
             
-        hashes = split_diacritics(text)
+        block_index = len(self.blocks_info)
+        hashes = split_diacritics(text, block_index=block_index)
         
         self.blocks_info.append({
+            "index": block_index,
             "type": block_type,
             "base_hash": hashes["base_hash"],
             "diacritics_hash": hashes["diacritics_hash"],
