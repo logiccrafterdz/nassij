@@ -11,6 +11,7 @@ from typing import Optional, List, Dict
 
 from core.arabic_processor import ArabicProcessor
 from core.table_handler import TableHandler
+from core.rtl_helpers import apply_rtl_paragraph, apply_rtl_run
 
 
 class DOCXBuilder:
@@ -77,40 +78,19 @@ class DOCXBuilder:
         
         # Set RTL if Arabic
         if is_arabic:
-            # Enforce RTL at paragraph level
-            pPr = p._element.get_or_add_pPr()
-            bidi = pPr.find(qn('w:bidi'))
-            if bidi is None:
-                bidi = OxmlElement('w:bidi')
-                pPr.append(bidi)
-            
-            # Set right alignment
-            p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+            apply_rtl_paragraph(p)
         else:
             p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
         
         # Add text with font settings
         run = p.add_run(processed_text)
-        run.font.name = font_name
         run.font.size = Pt(font_size)
         
         # Set RTL run property for Arabic
         if is_arabic:
-            rPr = run._element.get_or_add_rPr()
-            
-            # Complex script font settings
-            rFonts = OxmlElement('w:rFonts')
-            rFonts.set(qn('w:ascii'), font_name)
-            rFonts.set(qn('w:hAnsi'), font_name)
-            rFonts.set(qn('w:cs'), font_name)
-            rFonts.set(qn('w:hint'), 'cs')
-            rPr.append(rFonts)
-            
-            # RTL direction flag
-            rtl = rPr.find(qn('w:rtl'))
-            if rtl is None:
-                rtl = OxmlElement('w:rtl')
-                rPr.append(rtl)
+            apply_rtl_run(run, font_name)
+        else:
+            run.font.name = font_name
     
     def add_mixed_paragraph(self, 
                            text: str,
@@ -140,33 +120,10 @@ class DOCXBuilder:
         
         # For mixed text, use RTL if primarily Arabic
         if is_arabic:
-            # Paragraph level RTL
-            pPr = p._element.get_or_add_pPr()
-            bidi = pPr.find(qn('w:bidi'))
-            if bidi is None:
-                bidi = OxmlElement('w:bidi')
-                pPr.append(bidi)
-            
-            p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-            
-            # Add text with run level RTL properties
+            apply_rtl_paragraph(p)
             run = p.add_run(processed_text)
-            run.font.name = font_name
             run.font.size = Pt(font_size)
-            
-            rPr = run._element.get_or_add_rPr()
-            # Set complex script properties
-            rtl = rPr.find(qn('w:rtl'))
-            if rtl is None:
-                rtl = OxmlElement('w:rtl')
-                rPr.append(rtl)
-            
-            rFonts = OxmlElement('w:rFonts')
-            rFonts.set(qn('w:ascii'), font_name)
-            rFonts.set(qn('w:hAnsi'), font_name)
-            rFonts.set(qn('w:cs'), font_name)
-            rFonts.set(qn('w:hint'), 'cs')
-            rPr.append(rFonts)
+            apply_rtl_run(run, font_name)
         else:
             p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
             run = p.add_run(processed_text)
@@ -247,13 +204,7 @@ class DOCXBuilder:
             
             # Paragraph level RTL
             if is_arabic:
-                pPr = p._element.get_or_add_pPr()
-                bidi = pPr.find(qn('w:bidi'))
-                if bidi is None:
-                    bidi = OxmlElement('w:bidi')
-                    bidi.set(qn('w:val'), '1')
-                    pPr.append(bidi)
-                p.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+                apply_rtl_paragraph(p)
             else:
                 p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
                 
@@ -277,30 +228,10 @@ class DOCXBuilder:
                 b = color_int & 255
                 run.font.color.rgb = RGBColor(r, g, b)
                 
-                font_name = self.font_name
-                run.font.name = font_name
-                
                 if is_arabic:
-                    rPr = run._element.get_or_add_rPr()
-                    rtl = rPr.find(qn('w:rtl'))
-                    if rtl is None:
-                        rtl = OxmlElement('w:rtl')
-                        rtl.set(qn('w:val'), '1')
-                        rPr.append(rtl)
-                        
-                    lang = rPr.find(qn('w:lang'))
-                    if lang is None:
-                        lang = OxmlElement('w:lang')
-                        lang.set(qn('w:val'), 'ar-SA')
-                        lang.set(qn('w:bidi'), 'ar-SA')
-                        rPr.append(lang)
-                    
-                    rFonts = OxmlElement('w:rFonts')
-                    rFonts.set(qn('w:ascii'), font_name)
-                    rFonts.set(qn('w:hAnsi'), font_name)
-                    rFonts.set(qn('w:cs'), font_name)
-                    rFonts.set(qn('w:hint'), 'cs')
-                    rPr.append(rFonts)
+                    apply_rtl_run(run, font_name)
+                else:
+                    run.font.name = font_name
     
     def save(self, output_path: str) -> str:
         """
