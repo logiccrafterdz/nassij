@@ -4,7 +4,7 @@ Creates Microsoft Word-compatible documents with proper Arabic rendering.
 """
 from docx import Document
 from docx.shared import Pt, RGBColor
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT, WD_LINE_SPACING
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT, WD_LINE_SPACING, WD_COLOR_INDEX
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from typing import Optional, List, Dict
@@ -95,7 +95,8 @@ class DOCXBuilder:
     def add_mixed_paragraph(self, 
                            text: str,
                            font_name: Optional[str] = None,
-                           font_size: int = 11) -> None:
+                           font_size: int = 11,
+                           confidence: float = 1.0) -> None:
         """
         Add a paragraph that may contain mixed Arabic and Latin text.
         Automatically detects script and applies appropriate formatting.
@@ -104,6 +105,7 @@ class DOCXBuilder:
             text: Text content (may be mixed)
             font_name: Font name
             font_size: Font size in points
+            confidence: OCR confidence score (0.0 to 1.0)
         """
         if not self.doc:
             raise RuntimeError("Document not created. Call create_document() first.")
@@ -129,6 +131,12 @@ class DOCXBuilder:
             run = p.add_run(processed_text)
             run.font.name = font_name
             run.font.size = Pt(font_size)
+            
+        # Highlight low confidence text
+        if confidence < 0.5:
+            run.font.highlight_color = WD_COLOR_INDEX.RED
+        elif confidence < 0.85:
+            run.font.highlight_color = WD_COLOR_INDEX.YELLOW
     
     def add_image(self, image_data: bytes, width_points: Optional[float] = None) -> None:
         """
@@ -168,9 +176,10 @@ class DOCXBuilder:
             b_type = block.get('type', 'text')
             if b_type == 'text':
                 text = block.get('text', '').strip()
+                confidence = block.get('confidence', 1.0)
                 if text:
                     # Paragraph direction
-                    self.add_mixed_paragraph(text)
+                    self.add_mixed_paragraph(text, confidence=confidence)
             elif b_type == 'table':
                 self.add_table(block)
             elif b_type == 'image':
