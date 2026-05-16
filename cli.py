@@ -281,29 +281,66 @@ Examples:
         sys.exit(1)
         
     if args.command == 'verify':
-        print(f"Verifying Proof File: {args.proof}")
+        print(f"Verifying Proof File: {args.proof} against {args.docx}")
         try:
             with open(args.proof, 'r', encoding='utf-8') as f:
                 proof_data = json.load(f)
             
             # Recalculate root hash from leaves to verify tree integrity
             from integrity.merkle_tree import MerkleTree
+            from integrity.diacritics_splitter import split_diacritics
+            
             tree = MerkleTree()
             for block in proof_data.get('blocks', []):
                 tree.add_leaf(block['compound_hash'])
             calculated_root = tree.build()
             
-            if calculated_root == proof_data.get('merkle_root'):
-                print("✅ Proof is Valid!")
-                print(f"   Root Hash: {calculated_root}")
-                print(f"   Source File: {proof_data.get('source_file')}")
-                print(f"   Blocks Count: {proof_data.get('blocks_count')}")
-                sys.exit(0)
-            else:
-                print("❌ Proof is Invalid or Corrupted!")
+            if calculated_root != proof_data.get('merkle_root'):
+                print("❌ Proof Tree is Invalid or Corrupted!")
                 print(f"   Expected Root: {proof_data.get('merkle_root')}")
                 print(f"   Calculated:    {calculated_root}")
                 sys.exit(1)
+                
+            print("✅ Internal Proof Tree is Valid.")
+            
+            # Verify against DOCX
+            if not Path(args.docx).exists():
+                print(f"Error: DOCX file not found: {args.docx}")
+                sys.exit(1)
+                
+            from docx import Document
+            doc = Document(args.docx)
+            
+            # We only extract paragraphs because tables currently aren't hashed in the pipeline
+            docx_paragraphs = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+            
+            expected_blocks = [b for b in proof_data.get('blocks', []) if b.get('type') == 'text']
+            
+            # Note: There might be slight count mismatches if empty blocks were filtered out differently.
+            # A true robust verifier would do LCS matching, but for now we do direct matching.
+            matched = 0
+            for i, p_text in enumerate(docx_paragraphs):
+                # We don't know the exact block_index if some were skipped, but let's try to find a match
+                # by computing hash without block_index or by checking against all hashes.
+                # Since we added block_index, let's just find if the base text matches.
+                hashes = split_diacritics(p_text, block_index=-1) # calculate independent of index to see if text exists
+                
+                # We check if the base hash exists in the proof
+                found = any(b['base_hash'] == hashes['base_hash'] for b in expected_blocks)
+                if found:
+                    matched += 1
+                    
+            match_percentage = (matched / len(expected_blocks)) * 100 if expected_blocks else 100
+            
+            print(f"   DOCX Match: {matched}/{len(expected_blocks)} blocks ({match_percentage:.1f}%)")
+            
+            if match_percentage >= 95.0:
+                print("✅ DOCX Content Verified!")
+                sys.exit(0)
+            else:
+                print("❌ DOCX Content Does Not Match Proof!")
+                sys.exit(1)
+                
         except Exception as e:
             print(f"Error reading proof file: {e}")
             sys.exit(1)
