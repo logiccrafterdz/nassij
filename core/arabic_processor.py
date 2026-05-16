@@ -78,11 +78,11 @@ class ArabicProcessor:
 
         # Step 2: Fix RTL direction using bidi algorithm
         # This handles mixed-script paragraphs correctly
-        text = get_display(text)
+        text = str(get_display(text))
         
         # Step 3: Apply Arabic reshaping for ligatures and connections
         # Only reshape if text contains Arabic characters
-        if any(is_arabic_char(c) for c in text):
+        if any(is_arabic_char(str(c)) for c in text):
             try:
                 text = arabic_reshaper.reshape(text)
             except Exception as e:

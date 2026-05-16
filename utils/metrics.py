@@ -2,7 +2,7 @@
 Quality metrics for Nassij conversion.
 Implements CER, WER, diacritics preservation, and ligature validation.
 """
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 import unicodedata
 
 from utils.unicode_helpers import count_diacritics, normalize_nfc
@@ -122,7 +122,7 @@ def calculate_diacritics_preservation(reference: str, hypothesis: str) -> float:
     return min(preservation_rate, 1.0)
 
 
-def validate_ligatures(text: str) -> Dict[str, bool]:
+def validate_ligatures(text: str) -> Dict[str, Dict[str, Any]]:
     """
     Validate that known Arabic ligatures are present and correct.
     Target: 100% accuracy
@@ -233,27 +233,35 @@ def calculate_all_metrics(reference: str,
     Returns:
         Dictionary with all metrics
     """
-    metrics = {
-        'cer': calculate_cer(reference, hypothesis),
-        'wer': calculate_wer(reference, hypothesis),
-        'diacritics_preservation': calculate_diacritics_preservation(reference, hypothesis),
-        'ligatures': validate_ligatures(hypothesis),
+    cer = calculate_cer(reference, hypothesis)
+    wer = calculate_wer(reference, hypothesis)
+    diacritics_pres = calculate_diacritics_preservation(reference, hypothesis)
+    ligatures = validate_ligatures(hypothesis)
+    
+    metrics: Dict[str, Any] = {
+        'cer': cer,
+        'wer': wer,
+        'diacritics_preservation': diacritics_pres,
+        'ligatures': ligatures,
     }
     
     # Add table metrics if provided
+    table_acc: Optional[float] = None
     if reference_table and hypothesis_table:
-        metrics['table_accuracy'] = calculate_table_accuracy(reference_table, hypothesis_table)
+        table_acc = calculate_table_accuracy(reference_table, hypothesis_table)
+        metrics['table_accuracy'] = table_acc
     
     # Overall quality score (weighted average)
+    ligature_score = 1.0 if all(v.get('correctly_formed', False) for v in ligatures.values()) else 0.0
     quality_score = (
-        0.3 * (1.0 - metrics['cer']) +  # CER contribution
-        0.2 * (1.0 - metrics['wer']) +  # WER contribution
-        0.3 * metrics['diacritics_preservation'] +  # Diacritics contribution
-        0.2 * (1.0 if all(v.get('correctly_formed', False) for v in metrics['ligatures'].values()) else 0.0)  # Ligatures
+        0.3 * (1.0 - cer) +  # CER contribution
+        0.2 * (1.0 - wer) +  # WER contribution
+        0.3 * diacritics_pres +  # Diacritics contribution
+        0.2 * ligature_score  # Ligatures
     )
     
-    if 'table_accuracy' in metrics:
-        quality_score = 0.8 * quality_score + 0.2 * metrics['table_accuracy']
+    if table_acc is not None:
+        quality_score = 0.8 * quality_score + 0.2 * table_acc
     
     metrics['quality_score'] = quality_score
     

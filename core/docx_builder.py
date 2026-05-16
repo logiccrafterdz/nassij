@@ -3,8 +3,9 @@ DOCX generation module with full RTL support.
 Creates Microsoft Word-compatible documents with proper Arabic rendering.
 """
 from docx import Document
+from docx.document import Document as DocumentType
 from docx.shared import Pt, RGBColor
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT, WD_LINE_SPACING, WD_COLOR_INDEX
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT, WD_COLOR_INDEX
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from typing import Optional, List, Dict
@@ -32,9 +33,9 @@ class DOCXBuilder:
         self.font_name = font_name
         self.arabic_processor = ArabicProcessor(preserve_diacritics=preserve_diacritics)
         self.table_handler = TableHandler(self.arabic_processor, font_name=font_name)
-        self.doc: Optional[Document] = None
+        self.doc: Optional[DocumentType] = None
     
-    def create_document(self) -> Document:
+    def create_document(self) -> DocumentType:
         """
         Create a new DOCX document and set section-level RTL.
         """

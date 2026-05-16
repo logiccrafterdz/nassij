@@ -66,8 +66,8 @@ def convert_pdf_to_docx(
             docx_builder.create_document()
             
             # Initialize OCR engine or Scanner
-            ocr_engine = None
-            scanner = None
+            ocr_engine: Optional[OCRFacade] = None
+            scanner: Optional[NassijScanner] = None
             proof = IntegrityProof() if generate_proof else None
             
             if mode in ('scan', 'research'):
@@ -112,6 +112,7 @@ def convert_pdf_to_docx(
                                         proof.add_block(b.get('text', ''), b.get('type', 'text'))
                         continue
                     
+                    assert scanner is not None  # Guaranteed by mode == 'scan' branch above
                     blocks = scanner.scan_page(page)
                     if blocks:
                         docx_builder.add_scanned_blocks(blocks)

@@ -15,6 +15,7 @@ def test_add_mixed_paragraph():
     builder.add_mixed_paragraph("هذا اختبار", confidence=0.9)
     builder.add_mixed_paragraph("This is English", confidence=0.4)
     
+    assert builder.doc is not None
     assert len(builder.doc.paragraphs) == 2
     assert "هذا اختبار" in builder.doc.paragraphs[0].text
     assert "This is English" in builder.doc.paragraphs[1].text
@@ -33,6 +34,7 @@ def test_add_scanned_blocks():
     ]
     
     builder.add_scanned_blocks(blocks)
+    assert builder.doc is not None
     assert len(builder.doc.paragraphs) == 2
     assert "فقرة ثانية" in builder.doc.paragraphs[1].text
 
