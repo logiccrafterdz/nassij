@@ -279,12 +279,12 @@ Examples:
         
     if args.benchmark:
         print(f"Running benchmark on: {args.benchmark}")
-        # Simplistic benchmark for now
-        import time
+        import tempfile
+        benchmark_output = Path(tempfile.mkdtemp()) / "benchmark_output.docx"
         start_time = time.time()
         success = convert_pdf_to_docx(
             input_pdf=args.benchmark, 
-            output_docx="benchmark_output.docx", 
+            output_docx=str(benchmark_output), 
             mode='scan', 
             preserve_diacritics=True, 
             font_name='Arial', 
@@ -293,6 +293,8 @@ Examples:
         elapsed = time.time() - start_time
         if success:
             print(f"\nBenchmark completed successfully in {elapsed:.2f} seconds.")
+            # Cleanup temp file
+            benchmark_output.unlink(missing_ok=True)
         else:
             print(f"\nBenchmark failed after {elapsed:.2f} seconds.")
         return

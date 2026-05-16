@@ -238,9 +238,9 @@ class DOCXBuilder:
                 run.font.color.rgb = RGBColor(r, g, b)
                 
                 if is_arabic:
-                    apply_rtl_run(run, font_name)
+                    apply_rtl_run(run, self.font_name)
                 else:
-                    run.font.name = font_name
+                    run.font.name = self.font_name
     
     def save(self, output_path: str) -> str:
         """

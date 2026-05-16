@@ -24,8 +24,12 @@ def test_add_scanned_blocks():
     builder.create_document()
     
     blocks = [
-        {"type": "text", "text": "فقرة أولى"},
-        {"type": "text", "text": "فقرة ثانية"}
+        {"type": "paragraph", "text": "فقرة أولى", "spans": [
+            {"text": "فقرة أولى", "size": 12, "is_bold": False, "is_italic": False, "color": 0}
+        ], "bbox": [0, 0, 100, 20]},
+        {"type": "paragraph", "text": "فقرة ثانية", "spans": [
+            {"text": "فقرة ثانية", "size": 12, "is_bold": False, "is_italic": False, "color": 0}
+        ], "bbox": [0, 30, 100, 50]}
     ]
     
     builder.add_scanned_blocks(blocks)

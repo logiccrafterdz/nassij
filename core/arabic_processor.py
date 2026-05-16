@@ -9,6 +9,7 @@ This module handles:
 - Diacritics (tashkeel) preservation
 """
 import unicodedata
+import regex as re
 from typing import Optional
 from bidi.algorithm import get_display
 import arabic_reshaper
@@ -56,7 +57,6 @@ class ArabicProcessor:
             
         # Step 0: Detect Visual Glyphs (Presentation Forms B) and Reset to Logical
         # This fixes the "Garbage In" from PDFs that store pre-reversed/pre-shaped text
-        import regex as re
         
         # Check if text contains Arabic Presentation Forms
         has_presentation_forms = bool(re.search(r'[\ufb50-\ufdff\ufe70-\ufeff]', raw_text))
