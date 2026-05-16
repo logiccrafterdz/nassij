@@ -89,6 +89,10 @@ class NassijScanner:
             for span in spans:
                 chars = span.get("chars", [])
                 
+                span_bbox = span.get("bbox", [0, 0, 0, 0])
+                avg_width = (span_bbox[2] - span_bbox[0]) / max(len(chars), 1)
+                zero_width_threshold = max(avg_width * 0.1, 0.1)
+                
                 # Fix inverted Lam-Alif ligatures (where zero-width Alif precedes Lam in PDF stream)
                 i = 0
                 fixed_chars = []
@@ -103,7 +107,7 @@ class NassijScanner:
                         
                         # If Alif has ~0 width and is followed by Lam, it's a visual ligature
                         # that was extracted backwards. We must swap them to logical order (Lam then Alif).
-                        if width < 0.1 and next_c.get("c", "") == "ل":
+                        if width < zero_width_threshold and next_c.get("c", "") == "ل":
                             fixed_chars.append(next_c.get("c", ""))
                             fixed_chars.append(char_str)
                             i += 2
