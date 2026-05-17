@@ -10,6 +10,30 @@ class TestStage3Assembly:
     properly handles formatting (fonts, colors, styles), and applies correct RTL tags.
     """
     
+    def test_rtl_paragraph_has_bidi(self):
+        """Test A1: Every Arabic paragraph must have a w:bidi tag."""
+        builder = DOCXBuilder()
+        builder.create_document()
+        blocks = [{"type": "paragraph", "text": "فقرة عربية", "spans": [{"text": "عربية", "size": 12, "is_bold": False, "is_italic": False, "color": 0}], "bbox": [0,0,10,10]}]
+        builder.add_scanned_blocks(blocks)
+        
+        p = builder.doc.paragraphs[0]
+        pPr = p._element.pPr
+        assert pPr is not None
+        assert pPr.find(qn('w:bidi')) is not None, "Paragraph is missing w:bidi tag"
+
+    def test_rtl_run_has_rtl_tag(self):
+        """Test A2: Every Arabic run must have a w:rtl tag."""
+        builder = DOCXBuilder()
+        builder.create_document()
+        blocks = [{"type": "paragraph", "text": "عربي", "spans": [{"text": "عربي", "size": 12, "is_bold": False, "is_italic": False, "color": 0}], "bbox": [0,0,10,10]}]
+        builder.add_scanned_blocks(blocks)
+        
+        run = builder.doc.paragraphs[0].runs[0]
+        rPr = run._element.rPr
+        assert rPr is not None
+        assert rPr.find(qn('w:rtl')) is not None, "Run is missing w:rtl tag"
+    
     def test_no_duplicate_rfonts(self):
         """Test B3: Each run should have at most one w:rFonts element to prevent XML corruption."""
         builder = DOCXBuilder()

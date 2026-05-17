@@ -36,3 +36,28 @@ class TestStage2Processing:
         assert "\u0650" in result['text'] # Kasra
         assert "\u0651" in result['text'] # Shadda
         assert "\u064e" in result['text'] # Fatha
+
+    def test_process_empty_string(self):
+        """Test P4: Empty strings should not crash."""
+        processor = ArabicProcessor()
+        result = processor.process_paragraph("", logical_output=True)
+        assert result['text'] == ""
+        assert result['is_arabic'] is False
+
+    def test_kashida_removed(self):
+        """Test P5: Kashida (Tatweel) should be handled correctly (NFKC removes it or preserves it based on config).
+        Actually, standard NFKC does NOT remove Tatweel, but we should test that it doesn't corrupt the text."""
+        processor = ArabicProcessor()
+        text = "بـــسم"
+        result = processor.process_paragraph(text, logical_output=True)
+        assert "ب" in result['text']
+        assert "س" in result['text']
+        assert "م" in result['text']
+
+    def test_process_paragraph_idempotent(self):
+        """Test P7: Processing twice should yield the same result."""
+        processor = ArabicProcessor()
+        text = "تجربة المعالجة المتكررة"
+        pass1 = processor.process_paragraph(text, logical_output=True)
+        pass2 = processor.process_paragraph(pass1['text'], logical_output=True)
+        assert pass1['text'] == pass2['text']

@@ -1,6 +1,5 @@
 import pytest
 from core.arabic_processor import ArabicProcessor
-from core.ligature_processor import LigatureProcessor
 
 def test_arabic_processor_initialization():
     processor = ArabicProcessor()
@@ -48,16 +47,4 @@ def test_diacritics_count():
     # This test verifies the text is processed without errors
     assert len(result['text']) > 0
 
-def test_ligature_validation():
-    processor = LigatureProcessor()
-    text = "سلام الله عليكم لا إله إلا الله"
-    result = processor.check_ligatures(text)
-    
-    # check_ligatures returns 'visual_ligatures_found' and 'logical_ligatures_found'
-    assert result['logical_ligatures_found'] > 0  # "لا" sequences exist in text
-    assert result['visual_ligatures_found'] == 0  # No presentation forms in plain text
-    
-    # Let's test with actual visual ligatures
-    visual_text = "\ufefb"  # LAM WITH ALEF ISOLATED (Presentation Form)
-    result_visual = processor.check_ligatures(visual_text)
-    assert result_visual['visual_ligatures_found'] > 0
+

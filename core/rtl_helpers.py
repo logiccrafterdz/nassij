@@ -33,6 +33,10 @@ def apply_rtl_run(run, font_name, lang="ar-SA"):
         lang_tag.set(qn('w:bidi'), lang)
         rPr.append(lang_tag)
     
+    # Remove existing rFonts to avoid duplicates (Bug B3)
+    for font_elem in rPr.findall(qn('w:rFonts')):
+        rPr.remove(font_elem)
+        
     rFonts = OxmlElement('w:rFonts')
     rFonts.set(qn('w:ascii'), font_name)
     rFonts.set(qn('w:hAnsi'), font_name)

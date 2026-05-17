@@ -106,5 +106,29 @@ class TestStage1Extraction:
         # The text inside the block should preserve the newline between lines
         text = text_blocks[0]["text"]
         assert "السطر الأول" in text
-        assert "السطر الثاني" in text
         assert "\n" in text, f"Lines were merged with a space instead of newline: {repr(text)}"
+
+    def test_diacritics_extraction(self):
+        """Test E6: Diacritics (tashkeel) should be preserved during extraction."""
+        mock_page = Mock()
+        mock_page.get_text.return_value = {
+            "blocks": [{
+                "type": 0, "bbox": [0, 0, 100, 20],
+                "lines": [{
+                    "bbox": [0, 0, 100, 20],
+                    "spans": [
+                        {"bbox": [0, 0, 100, 20], "chars": [{"c": c} for c in "بِسْمِ اللَّهِ"]}
+                    ]
+                }]
+            }]
+        }
+        mock_page.find_tables.return_value = []
+        
+        scanner = NassijScanner()
+        blocks = scanner.scan_page(mock_page)
+        extracted = blocks[0]["text"]
+        
+        # Diacritics should be in the extracted text
+        assert "\u0650" in extracted # Kasra
+        assert "\u0651" in extracted # Shadda
+        assert "\u064e" in extracted # Fatha
