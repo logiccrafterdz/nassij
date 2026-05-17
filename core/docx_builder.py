@@ -218,10 +218,17 @@ class DOCXBuilder:
             else:
                 p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
                 
+            prev_line_idx = -1
             for span in block.get('spans', []):
                 span_text = span.get('text', '')
                 if not span_text.strip():
                     continue
+                
+                # When spans come from different lines, add a line break run
+                current_line_idx = span.get('line_idx', -1)
+                if prev_line_idx != -1 and current_line_idx != prev_line_idx:
+                    p.add_run('\n')
+                prev_line_idx = current_line_idx
                     
                 processed_span = self.arabic_processor.process_paragraph(span_text, logical_output=True)
                 run = p.add_run(processed_span['text'])

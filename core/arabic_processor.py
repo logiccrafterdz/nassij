@@ -64,6 +64,14 @@ class ArabicProcessor:
         if has_presentation_forms:
             # NFKC maps visual glyphs (ﻼ) to base characters (ل+ا)
             text = unicodedata.normalize('NFKC', raw_text)
+            
+            # Post-NFKC fix: NFKC maps some presentation forms to Farsi variants
+            # instead of standard Arabic. We must normalize these for correct rendering.
+            # Farsi Yeh (U+06CC ی) → Arabic Yeh (U+064A ي)
+            # Farsi Keh (U+06A9 ک) → Arabic Kaf (U+0643 ك)
+            # Alef Maksura (U+0649 ى) should stay as-is (it's a valid Arabic letter)
+            text = text.replace('\u06CC', '\u064A')  # ی → ي
+            text = text.replace('\u06A9', '\u0643')  # ک → ك
         else:
             text = raw_text
         
