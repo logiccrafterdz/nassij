@@ -238,10 +238,13 @@ class DOCXBuilder:
                 b = color_int & 255
                 run.font.color.rgb = RGBColor(r, g, b)
                 
+                span_font = span.get('font', '').strip()
+                target_font = span_font if span_font else self.font_name
+                
                 if is_arabic:
-                    apply_rtl_run(run, self.font_name)
+                    apply_rtl_run(run, target_font)
                 else:
-                    run.font.name = self.font_name
+                    run.font.name = target_font
     
     def save(self, output_path: str) -> str:
         """

@@ -82,39 +82,16 @@ class NassijScanner:
         for line in lines:
             spans = line.get("spans", [])
             
-            # Simple heuristic for RTL sorting of spans: sort by X-coordinate descending
-            # This ensures right-most text appears first in the sequence.
-            spans.sort(key=lambda s: s["bbox"][0], reverse=True)
+            # Do not blindly sort spans by X-coordinate (Bug B1).
+            # Modern PDFs store text in logical stream order. ArabicProcessor will handle bidi later.
             
             for span in spans:
                 chars = span.get("chars", [])
                 
                 span_bbox = span.get("bbox", [0, 0, 0, 0])
-                avg_width = (span_bbox[2] - span_bbox[0]) / max(len(chars), 1)
-                zero_width_threshold = max(avg_width * 0.1, 0.1)
-                
-                # Fix inverted Lam-Alif ligatures (where zero-width Alif precedes Lam in PDF stream)
-                i = 0
                 fixed_chars = []
-                while i < len(chars):
-                    c = chars[i]
-                    char_str = c.get("c", "")
-                    
-                    if char_str in ["ا", "أ", "إ", "آ"] and i + 1 < len(chars):
-                        bbox = c.get("bbox", [0, 0, 0, 0])
-                        width = bbox[2] - bbox[0]
-                        next_c = chars[i+1]
-                        
-                        # If Alif has ~0 width and is followed by Lam, it's a visual ligature
-                        # that was extracted backwards. We must swap them to logical order (Lam then Alif).
-                        if width < zero_width_threshold and next_c.get("c", "") == "ل":
-                            fixed_chars.append(next_c.get("c", ""))
-                            fixed_chars.append(char_str)
-                            i += 2
-                            continue
-                            
-                    fixed_chars.append(char_str)
-                    i += 1
+                for c in chars:
+                    fixed_chars.append(c.get("c", ""))
                 
                 text = "".join(fixed_chars).strip()
                 if not text:
@@ -139,7 +116,8 @@ class NassijScanner:
                     "is_bold": is_bold,
                     "is_italic": is_italic,
                     "color": color,
-                    "bbox": span.get("bbox")
+                    "bbox": span.get("bbox"),
+                    "line_idx": lines.index(line)  # Keep track of which line this span belongs to
                 })
                 
         if not processed_spans:
@@ -150,8 +128,23 @@ class NassijScanner:
         if max_size >= 14 or any(s["is_bold"] for s in processed_spans if s["size"] == max_size):
             is_heading = True
             
-        # Join text for the whole block for easy access
-        full_text = " ".join([s["text"] for s in processed_spans])
+        # Reconstruct text preserving lines (Bug B2)
+        lines_text = []
+        current_line_idx = -1
+        current_line_spans = []
+        
+        for s in processed_spans:
+            if s["line_idx"] != current_line_idx:
+                if current_line_spans:
+                    lines_text.append(" ".join(current_line_spans))
+                current_line_spans = []
+                current_line_idx = s["line_idx"]
+            current_line_spans.append(s["text"])
+            
+        if current_line_spans:
+            lines_text.append(" ".join(current_line_spans))
+            
+        full_text = "\n".join(lines_text)
         
         return {
             "type": "heading" if is_heading else "paragraph",
