@@ -61,3 +61,16 @@ class TestStage2Processing:
         pass1 = processor.process_paragraph(text, logical_output=True)
         pass2 = processor.process_paragraph(pass1['text'], logical_output=True)
         assert pass1['text'] == pass2['text']
+
+    def test_farsi_yeh_normalized(self):
+        """Test B8: NFKC converts Presentation Forms to Farsi Yeh (U+06CC).
+        We must post-process it to standard Arabic Yeh (U+064A)."""
+        processor = ArabicProcessor()
+        # U+FBFE is ARABIC LETTER FARSI YEH INITIAL FORM — common in PDFs
+        text = "اﻟﺟﻣﻬورﯾﺔ"  # Contains U+FBFE
+        result = processor.process_paragraph(text, logical_output=True)
+        
+        # Should NOT contain Farsi Yeh (U+06CC)
+        assert '\u06CC' not in result['text'], f"Farsi Yeh still present: {result['text']}"
+        # Should contain standard Arabic Yeh (U+064A)
+        assert '\u064A' in result['text'], f"Arabic Yeh missing: {result['text']}"
