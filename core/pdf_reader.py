@@ -205,9 +205,11 @@ class PDFReader:
 
     def _is_text_mangled(self, text: str) -> bool:
         """
-        Check if text is likely corrupted/mangled (mojibake).
-        Heuristic: High percentage of replacement characters or non-printable chars.
+        Check if text is likely corrupted/mangled (mojibake or CID mapping issues).
+        Heuristic: High percentage of replacement characters, non-printable chars,
+        or impossible Arabic sequences (e.g., 3+ consecutive Alifs).
         """
+        import re
         if not text:
             return False
             
@@ -226,6 +228,16 @@ class PDFReader:
         
         # If text is long but has very few printable/arabic/latin chars, it might be mangled
         if total_len > 100 and (bad_chars / total_len > 0.1 or unprintable / total_len > 0.2):
+            return True
+            
+        # CID mapping corruption often maps Kashida (Tatweel) to Alif or other letters
+        # resulting in impossible sequences like 3 or 4 Alifs in a row.
+        # Any Arabic letter repeated 3+ times consecutively is highly suspicious.
+        # We check for 3+ consecutive Alifs, or 4+ of any other Arabic letter.
+        if re.search(r'[اأإآ]{3,}', text):
+            return True
+            
+        if re.search(r'([\u0621-\u064A])\1{3,}', text):
             return True
             
         return False
